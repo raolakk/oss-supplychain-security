@@ -1,0 +1,971 @@
+{
+  "metadata": {
+    "title": "AI / ML Supply Chain Security Landscape",
+    "version": "1.0.0",
+    "lastUpdated": "2026-04-01",
+    "description": "Comprehensive mapping of AI/ML supply chain security tools, frameworks, and standards across the full model lifecycle — from training data to production monitoring.",
+    "unifiedModel": "Maps NIST AI RMF, OWASP ML/LLM Top 10, MITRE ATLAS, and emerging AI governance standards into 8 AI lifecycle phases."
+  },
+  "foundations": {
+    "openssf": {
+      "name": "Open Source Security Foundation (OpenSSF)",
+      "url": "https://openssf.org",
+      "parent": "Linux Foundation",
+      "color": "#4B8BBE",
+      "abbr": "OpenSSF"
+    },
+    "oasis": {
+      "name": "OASIS Open / CoSAI",
+      "url": "https://www.oasis-open.org",
+      "parent": null,
+      "color": "#E97627",
+      "abbr": "OASIS"
+    },
+    "owasp": {
+      "name": "OWASP Foundation",
+      "url": "https://owasp.org",
+      "parent": null,
+      "color": "#404040",
+      "abbr": "OWASP"
+    },
+    "nist": {
+      "name": "National Institute of Standards and Technology",
+      "url": "https://www.nist.gov",
+      "parent": "US Department of Commerce",
+      "color": "#1B5E20",
+      "abbr": "NIST"
+    },
+    "mlcommons": {
+      "name": "MLCommons",
+      "url": "https://mlcommons.org",
+      "parent": null,
+      "color": "#7B1FA2",
+      "abbr": "MLCommons"
+    },
+    "mitre": {
+      "name": "MITRE Corporation",
+      "url": "https://www.mitre.org",
+      "parent": null,
+      "color": "#C62828",
+      "abbr": "MITRE"
+    },
+    "lfai": {
+      "name": "LF AI & Data Foundation",
+      "url": "https://lfaidata.foundation",
+      "parent": "Linux Foundation",
+      "color": "#009639",
+      "abbr": "LF AI"
+    },
+    "community": {
+      "name": "Community / Independent Projects",
+      "url": null,
+      "parent": null,
+      "color": "#888888",
+      "abbr": "Community"
+    }
+  },
+  "phases": [
+    {
+      "id": "data",
+      "number": 1,
+      "name": "Training Data Sourcing & Curation",
+      "shortName": "Data",
+      "icon": "🗂️",
+      "description": "Sourcing, curating, validating, and documenting training datasets. Ensuring data quality, detecting poisoning, managing provenance, and handling PII/copyright compliance.",
+      "nistAiRmfMapping": "MAP 1.5, MAP 2.3 — Data provenance and quality assessment",
+      "owaspMapping": "ML04 — Data Poisoning, ML01 — Input Manipulation",
+      "mitreAtlasMapping": "AML.T0020 — Poison Training Data, AML.T0019 — Publish Poisoned Dataset",
+      "threats": [
+        "Training data poisoning (backdoor injection)",
+        "Biased or unrepresentative training data",
+        "PII / sensitive data in training sets",
+        "Copyright / license violations in scraped data",
+        "Mislabeled or corrupted data samples",
+        "Web-scraped adversarial content injection"
+      ],
+      "controls": [
+        "Data provenance tracking and lineage",
+        "Automated data quality validation",
+        "PII detection and scrubbing pipelines",
+        "Bias auditing and fairness testing of datasets",
+        "Dataset licensing and compliance checks",
+        "Data versioning and reproducibility"
+      ],
+      "tools": [
+        {
+          "name": "Croissant (MLCommons)",
+          "foundation": "mlcommons",
+          "url": "https://github.com/mlcommons/croissant",
+          "description": "Metadata format for ML datasets — describes dataset structure, provenance, licensing, and responsible AI properties in a machine-readable format.",
+          "maturity": "active",
+          "controlsCovered": ["Data provenance tracking and lineage", "Dataset licensing and compliance checks"]
+        },
+        {
+          "name": "Data Provenance Initiative",
+          "foundation": "community",
+          "url": "https://www.dataprovenance.org",
+          "description": "Large-scale audit of training datasets used in AI — maps provenance, licensing, and composition of popular datasets.",
+          "maturity": "active",
+          "controlsCovered": ["Data provenance tracking and lineage", "Dataset licensing and compliance checks"]
+        },
+        {
+          "name": "DVC (Data Version Control)",
+          "foundation": "community",
+          "url": "https://dvc.org",
+          "description": "Git-based version control for datasets and ML experiments — tracks data lineage, enables reproducible pipelines, and manages large files.",
+          "maturity": "production",
+          "controlsCovered": ["Data versioning and reproducibility", "Data provenance tracking and lineage"]
+        },
+        {
+          "name": "Great Expectations",
+          "foundation": "community",
+          "url": "https://greatexpectations.io",
+          "description": "Data validation framework — defines expectations for data quality, schema conformance, and statistical properties with automated testing.",
+          "maturity": "production",
+          "controlsCovered": ["Automated data quality validation"]
+        },
+        {
+          "name": "Presidio (Microsoft)",
+          "foundation": "community",
+          "url": "https://github.com/microsoft/presidio",
+          "description": "SDK for data protection and PII anonymization — detects and de-identifies PII in text and images for safe training data preparation.",
+          "maturity": "production",
+          "controlsCovered": ["PII detection and scrubbing pipelines"]
+        },
+        {
+          "name": "Cleanlab",
+          "foundation": "community",
+          "url": "https://github.com/cleanlab/cleanlab",
+          "description": "Data-centric AI tool for finding and fixing label errors, outliers, and data quality issues in ML datasets automatically.",
+          "maturity": "production",
+          "controlsCovered": ["Automated data quality validation", "Bias auditing and fairness testing of datasets"]
+        },
+        {
+          "name": "AI Fairness 360 (AIF360)",
+          "foundation": "lfai",
+          "url": "https://aif360.res.ibm.com",
+          "description": "IBM toolkit for detecting and mitigating bias in datasets and ML models — provides 70+ fairness metrics and 10+ bias mitigation algorithms.",
+          "maturity": "active",
+          "controlsCovered": ["Bias auditing and fairness testing of datasets"]
+        },
+        {
+          "name": "Know Your Data (Google)",
+          "foundation": "community",
+          "url": "https://knowyourdata.withgoogle.com",
+          "description": "Tool for exploring and understanding ML datasets — surfaces potential biases, sensitive content, and data quality issues before training.",
+          "maturity": "active",
+          "controlsCovered": ["Bias auditing and fairness testing of datasets", "Automated data quality validation"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Automated data poisoning detection",
+          "severity": "red",
+          "description": "No production-ready tool reliably detects sophisticated data poisoning or backdoor injection in large-scale training datasets."
+        },
+        {
+          "title": "Training data copyright verification",
+          "severity": "red",
+          "description": "No automated system can determine copyright status of web-scraped or crowd-sourced training data at scale. Legal frameworks are still evolving."
+        },
+        {
+          "title": "Cross-dataset provenance standard",
+          "severity": "yellow",
+          "description": "Croissant is emerging but adoption is early. No universal standard links a model's performance to specific training data subsets."
+        }
+      ]
+    },
+    {
+      "id": "training",
+      "number": 2,
+      "name": "Model Development & Training",
+      "shortName": "Training",
+      "icon": "⚙️",
+      "description": "Securing the model training pipeline — reproducible experiments, isolated compute environments, tamper-resistant training processes, and training artifact integrity.",
+      "nistAiRmfMapping": "MAP 3.4 — Secure development practices for AI",
+      "owaspMapping": "ML06 — AI Supply Chain Attacks (training phase)",
+      "mitreAtlasMapping": "AML.T0018 — Backdoor ML Model, AML.T0035 — Develop Capabilities",
+      "threats": [
+        "Training pipeline compromise / code injection",
+        "Malicious code in training scripts or notebooks",
+        "Backdoor injection during fine-tuning",
+        "Gradient leaking / training data extraction",
+        "Compromised training infrastructure (GPU clusters)",
+        "Hyperparameter manipulation to degrade models"
+      ],
+      "controls": [
+        "Reproducible training pipelines (code + data + environment)",
+        "Training environment isolation and access control",
+        "Training checkpoint signing and verification",
+        "Experiment tracking and audit logging",
+        "Compute integrity verification",
+        "Dependency pinning for training frameworks"
+      ],
+      "tools": [
+        {
+          "name": "MLflow",
+          "foundation": "lfai",
+          "url": "https://mlflow.org",
+          "description": "Open source platform for ML lifecycle management — experiment tracking, reproducible runs, model packaging, and deployment. LF AI & Data project.",
+          "maturity": "graduated",
+          "controlsCovered": ["Experiment tracking and audit logging", "Reproducible training pipelines (code + data + environment)"]
+        },
+        {
+          "name": "Kubeflow",
+          "foundation": "community",
+          "url": "https://www.kubeflow.org",
+          "description": "Kubernetes-native ML workflow platform — provides pipeline orchestration, experiment tracking, and scalable training with infrastructure isolation.",
+          "maturity": "production",
+          "controlsCovered": ["Training environment isolation and access control", "Reproducible training pipelines (code + data + environment)"]
+        },
+        {
+          "name": "Determined AI",
+          "foundation": "community",
+          "url": "https://github.com/determined-ai/determined",
+          "description": "Deep learning training platform with built-in experiment tracking, distributed training, hyperparameter search, and reproducibility features.",
+          "maturity": "production",
+          "controlsCovered": ["Reproducible training pipelines (code + data + environment)", "Experiment tracking and audit logging"]
+        },
+        {
+          "name": "DVC (pipeline mode)",
+          "foundation": "community",
+          "url": "https://dvc.org",
+          "description": "ML pipeline versioning and reproducibility — tracks code, data, parameters, and metrics together for fully reproducible training runs.",
+          "maturity": "production",
+          "controlsCovered": ["Reproducible training pipelines (code + data + environment)", "Dependency pinning for training frameworks"]
+        },
+        {
+          "name": "SLSA for ML (proposal)",
+          "foundation": "openssf",
+          "url": "https://slsa.dev",
+          "description": "Proposed extension of SLSA framework to ML training pipelines — applying build provenance concepts to model training processes.",
+          "maturity": "experimental",
+          "controlsCovered": ["Training checkpoint signing and verification", "Compute integrity verification"]
+        },
+        {
+          "name": "Metaflow",
+          "foundation": "community",
+          "url": "https://metaflow.org",
+          "description": "Human-centric ML infrastructure framework (Netflix) — manages data, compute, and versioning for reproducible ML workflows.",
+          "maturity": "production",
+          "controlsCovered": ["Reproducible training pipelines (code + data + environment)", "Training environment isolation and access control"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Training pipeline tamper detection",
+          "severity": "red",
+          "description": "No equivalent of SLSA provenance exists for ML training. Cannot cryptographically verify that a model was trained with specific code, data, and parameters."
+        },
+        {
+          "title": "Fine-tuning chain of custody",
+          "severity": "red",
+          "description": "When models are fine-tuned across organizations, no standard tracks the full lineage from base model through each fine-tuning step."
+        },
+        {
+          "title": "GPU/TPU compute integrity",
+          "severity": "yellow",
+          "description": "No mechanism to verify that training hardware has not been compromised. Side-channel attacks on GPU clusters are an emerging concern."
+        }
+      ]
+    },
+    {
+      "id": "packaging",
+      "number": 3,
+      "name": "Model Packaging & Signing",
+      "shortName": "Packaging",
+      "icon": "📦",
+      "description": "Securely packaging model artifacts, signing model weights, using safe serialization formats, and generating provenance attestations for AI/ML models.",
+      "nistAiRmfMapping": "GOVERN 1.7 — AI artifact integrity and traceability",
+      "owaspMapping": "ML06 — AI Supply Chain Attacks (packaging phase)",
+      "mitreAtlasMapping": "AML.T0010 — ML Supply Chain Compromise, AML.T0017 — Develop Adversarial ML Artifacts",
+      "threats": [
+        "Pickle deserialization attacks (arbitrary code execution)",
+        "Model file tampering after training",
+        "Unsigned model weights distributed without verification",
+        "Malicious code embedded in model files",
+        "Lack of provenance for fine-tuned or merged models",
+        "Model weight extraction and unauthorized redistribution"
+      ],
+      "controls": [
+        "Safe serialization formats (avoid pickle)",
+        "Cryptographic model signing (Sigstore)",
+        "Model hash verification on download",
+        "Provenance attestation for models",
+        "Model file format validation and scanning",
+        "Keyless signing with OIDC identity binding"
+      ],
+      "tools": [
+        {
+          "name": "Model Signing (Sigstore)",
+          "foundation": "openssf",
+          "url": "https://github.com/sigstore/model-transparency",
+          "description": "Applies Sigstore-based signing to ML models — generates cryptographic signatures and provenance attestations for model artifacts.",
+          "maturity": "experimental",
+          "controlsCovered": ["Cryptographic model signing (Sigstore)", "Provenance attestation for models", "Keyless signing with OIDC identity binding"]
+        },
+        {
+          "name": "Safetensors (Hugging Face)",
+          "foundation": "community",
+          "url": "https://github.com/huggingface/safetensors",
+          "description": "Safe and fast file format for storing tensors — eliminates arbitrary code execution risks from pickle-based formats (PyTorch, TensorFlow).",
+          "maturity": "production",
+          "controlsCovered": ["Safe serialization formats (avoid pickle)", "Model file format validation and scanning"]
+        },
+        {
+          "name": "ModelScan (Protect AI)",
+          "foundation": "community",
+          "url": "https://github.com/protectai/modelscan",
+          "description": "Scans ML model files for unsafe operations — detects malicious code in pickle, H5, SavedModel, and other serialization formats.",
+          "maturity": "active",
+          "controlsCovered": ["Model file format validation and scanning", "Safe serialization formats (avoid pickle)"]
+        },
+        {
+          "name": "ONNX Runtime",
+          "foundation": "lfai",
+          "url": "https://onnxruntime.ai",
+          "description": "Cross-platform inference accelerator with safe model format (ONNX protobuf) — avoids unsafe deserialization while enabling model portability.",
+          "maturity": "production",
+          "controlsCovered": ["Safe serialization formats (avoid pickle)"]
+        },
+        {
+          "name": "Cosign (for model OCI artifacts)",
+          "foundation": "openssf",
+          "url": "https://github.com/sigstore/cosign",
+          "description": "Extended to sign OCI-packaged model artifacts — enables keyless signing and verification of models stored in container registries.",
+          "maturity": "graduated",
+          "controlsCovered": ["Cryptographic model signing (Sigstore)", "Keyless signing with OIDC identity binding"]
+        },
+        {
+          "name": "fickling",
+          "foundation": "community",
+          "url": "https://github.com/trailofbits/fickling",
+          "description": "Python pickle decompiler and static analyzer — detects malicious code hidden in serialized Python objects used in ML model files.",
+          "maturity": "active",
+          "controlsCovered": ["Model file format validation and scanning"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Model signing adoption",
+          "severity": "red",
+          "description": "Sigstore Model Signing is experimental. No model hub (Hugging Face, PyTorch Hub) requires signed models by default. Adoption is near zero."
+        },
+        {
+          "title": "Fine-tuned model provenance",
+          "severity": "red",
+          "description": "No standard for attesting the chain of custody through fine-tuning: base model → dataset → parameters → resulting model."
+        },
+        {
+          "title": "Safe format migration",
+          "severity": "yellow",
+          "description": "Despite safetensors availability, many popular models still distribute in pickle format. Migration tooling exists but ecosystem-wide adoption is slow."
+        }
+      ]
+    },
+    {
+      "id": "registry",
+      "number": 4,
+      "name": "Model Registry & Distribution",
+      "shortName": "Registry",
+      "icon": "🏪",
+      "description": "Hosting, sharing, and distributing AI/ML models through registries. Ensuring access controls, integrity verification, namespace protection, and secure model delivery.",
+      "nistAiRmfMapping": "GOVERN 1.6 — Mechanisms for secure AI artifact distribution",
+      "owaspMapping": "ML06 — AI Supply Chain Attacks (distribution phase)",
+      "mitreAtlasMapping": "AML.T0010.002 — ML Supply Chain Compromise: Model Repository",
+      "threats": [
+        "Model registry account takeover",
+        "Model substitution / swapping attacks",
+        "Typosquatting on model names",
+        "Unauthorized model access and exfiltration",
+        "Malicious model uploads to public hubs",
+        "Model namespace hijacking"
+      ],
+      "controls": [
+        "Model registry access controls and MFA",
+        "Model integrity verification on download",
+        "Namespace and model name protection",
+        "Model versioning with immutable releases",
+        "Secure distribution channels (checksums + signatures)",
+        "Model access audit logging"
+      ],
+      "tools": [
+        {
+          "name": "Hugging Face Hub",
+          "foundation": "community",
+          "url": "https://huggingface.co",
+          "description": "Largest open model hub — hosts 500K+ models with versioning, access controls, model cards, gated models, and malware scanning.",
+          "maturity": "production",
+          "controlsCovered": ["Model registry access controls and MFA", "Model versioning with immutable releases", "Model access audit logging"]
+        },
+        {
+          "name": "MLflow Model Registry",
+          "foundation": "lfai",
+          "url": "https://mlflow.org/docs/latest/model-registry.html",
+          "description": "Centralized model store for managing model lifecycle — versioning, staging, annotations, and deployment tracking.",
+          "maturity": "graduated",
+          "controlsCovered": ["Model versioning with immutable releases", "Model access audit logging"]
+        },
+        {
+          "name": "ORAS (OCI Registry As Storage)",
+          "foundation": "community",
+          "url": "https://oras.land",
+          "description": "Enables storing any artifact (including ML models) in OCI-compliant registries — leverages container registry security infrastructure for model distribution.",
+          "maturity": "production",
+          "controlsCovered": ["Secure distribution channels (checksums + signatures)", "Model integrity verification on download"]
+        },
+        {
+          "name": "Harbor (for ML artifacts)",
+          "foundation": "community",
+          "url": "https://goharbor.io",
+          "description": "Enterprise container registry extended to host OCI-packaged ML models with vulnerability scanning, content trust, and replication.",
+          "maturity": "graduated",
+          "controlsCovered": ["Model registry access controls and MFA", "Model integrity verification on download", "Secure distribution channels (checksums + signatures)"]
+        },
+        {
+          "name": "ModelDB",
+          "foundation": "community",
+          "url": "https://github.com/VertaAI/modeldb",
+          "description": "Open source model management system — tracks model versions, experiments, and metadata for reproducibility and governance.",
+          "maturity": "active",
+          "controlsCovered": ["Model versioning with immutable releases", "Model access audit logging"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Model hub security standards",
+          "severity": "red",
+          "description": "No industry standard for model hub security requirements. Hugging Face, PyTorch Hub, and others have ad-hoc security with no common baseline."
+        },
+        {
+          "title": "Model typosquatting prevention",
+          "severity": "yellow",
+          "description": "No tooling exists to detect and prevent model name squatting or typosquatting on public model hubs. Attackers can publish malicious models with similar names."
+        },
+        {
+          "title": "Cross-hub model verification",
+          "severity": "yellow",
+          "description": "Models are re-hosted across multiple hubs with no standard for verifying that a copy matches the original or tracking its distribution chain."
+        }
+      ]
+    },
+    {
+      "id": "evaluation",
+      "number": 5,
+      "name": "Model Evaluation & Red Teaming",
+      "shortName": "Evaluation",
+      "icon": "🔬",
+      "description": "Adversarial testing, safety evaluation, bias auditing, and red teaming of AI/ML models before deployment. Assessing robustness, fairness, and security properties.",
+      "nistAiRmfMapping": "MEASURE 2.6, 2.7 — AI system testing and evaluation, adversarial testing",
+      "owaspMapping": "LLM01 — Prompt Injection, LLM02 — Insecure Output Handling, LLM09 — Overreliance",
+      "mitreAtlasMapping": "AML.T0043 — Craft Adversarial Data, AML.T0015 — Evade ML Model, AML.T0040 — ML Model Inference API Access",
+      "threats": [
+        "Adversarial inputs causing misclassification",
+        "Prompt injection attacks on LLMs",
+        "Jailbreaking / safety bypass techniques",
+        "Bias and fairness failures in production",
+        "Model inversion / membership inference attacks",
+        "Hallucination and factual inaccuracy"
+      ],
+      "controls": [
+        "Adversarial robustness testing",
+        "Prompt injection detection and testing",
+        "Bias and fairness evaluation benchmarks",
+        "Red teaming exercises (manual + automated)",
+        "Safety evaluation benchmarks",
+        "Privacy leakage testing (membership inference)"
+      ],
+      "tools": [
+        {
+          "name": "PyRIT (Microsoft)",
+          "foundation": "community",
+          "url": "https://github.com/Azure/PyRIT",
+          "description": "Python Risk Identification Toolkit — automated red teaming framework for generative AI, testing prompt injection, jailbreaks, and harmful content generation.",
+          "maturity": "active",
+          "controlsCovered": ["Red teaming exercises (manual + automated)", "Prompt injection detection and testing"]
+        },
+        {
+          "name": "Garak",
+          "foundation": "community",
+          "url": "https://github.com/NVIDIA/garak",
+          "description": "LLM vulnerability scanner — probes language models for hallucination, data leakage, prompt injection, toxicity, and other failure modes.",
+          "maturity": "active",
+          "controlsCovered": ["Prompt injection detection and testing", "Adversarial robustness testing", "Red teaming exercises (manual + automated)"]
+        },
+        {
+          "name": "Adversarial Robustness Toolbox (ART)",
+          "foundation": "lfai",
+          "url": "https://github.com/Trusted-AI/adversarial-robustness-toolbox",
+          "description": "IBM library for ML security — provides attacks, defenses, and robustness metrics for evasion, poisoning, extraction, and inference threats.",
+          "maturity": "active",
+          "controlsCovered": ["Adversarial robustness testing", "Privacy leakage testing (membership inference)"]
+        },
+        {
+          "name": "HELM (Stanford CRFM)",
+          "foundation": "community",
+          "url": "https://crfm.stanford.edu/helm",
+          "description": "Holistic Evaluation of Language Models — comprehensive benchmark suite measuring accuracy, calibration, robustness, fairness, bias, toxicity, and efficiency.",
+          "maturity": "active",
+          "controlsCovered": ["Safety evaluation benchmarks", "Bias and fairness evaluation benchmarks"]
+        },
+        {
+          "name": "Inspect AI (UK AISI)",
+          "foundation": "community",
+          "url": "https://github.com/UKGovernmentBEIS/inspect_ai",
+          "description": "Framework for large language model evaluations by UK AI Safety Institute — supports custom evaluations with built-in safety benchmarks.",
+          "maturity": "active",
+          "controlsCovered": ["Safety evaluation benchmarks", "Red teaming exercises (manual + automated)"]
+        },
+        {
+          "name": "DeepEval",
+          "foundation": "community",
+          "url": "https://github.com/confident-ai/deepeval",
+          "description": "Open source LLM evaluation framework — unit testing for LLMs with metrics for hallucination, toxicity, bias, answer relevancy, and faithfulness.",
+          "maturity": "active",
+          "controlsCovered": ["Safety evaluation benchmarks", "Bias and fairness evaluation benchmarks"]
+        },
+        {
+          "name": "MLCommons AI Safety Benchmarks",
+          "foundation": "mlcommons",
+          "url": "https://mlcommons.org/ai-safety/",
+          "description": "Standardized safety evaluation benchmarks for AI systems — consortium-led effort to create widely adopted safety testing standards.",
+          "maturity": "active",
+          "controlsCovered": ["Safety evaluation benchmarks"]
+        },
+        {
+          "name": "Counterfit (Microsoft)",
+          "foundation": "community",
+          "url": "https://github.com/Azure/counterfit",
+          "description": "Command-line tool for assessing ML model security — automates adversarial attacks against ML models using ART and TextAttack backends.",
+          "maturity": "active",
+          "controlsCovered": ["Adversarial robustness testing", "Red teaming exercises (manual + automated)"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Standardized AI safety benchmarks",
+          "severity": "yellow",
+          "description": "Multiple competing benchmark suites exist but no universal standard for 'AI safety certification.' MLCommons is working on this but adoption is early."
+        },
+        {
+          "title": "Multimodal model evaluation",
+          "severity": "red",
+          "description": "Most red teaming tools focus on text LLMs. Evaluation of multimodal models (vision, audio, video) for adversarial robustness is severely underserved."
+        },
+        {
+          "title": "Automated red teaming maturity",
+          "severity": "yellow",
+          "description": "PyRIT and Garak are promising but early. Automated red teaming cannot yet match the creativity and coverage of human red teams for novel attack vectors."
+        }
+      ]
+    },
+    {
+      "id": "aibom",
+      "number": 6,
+      "name": "AI BOM & Transparency",
+      "shortName": "AI BOM",
+      "icon": "📋",
+      "description": "Generating and managing AI Bills of Materials — model cards, data cards, ML-BOMs — to ensure transparency, reproducibility, and regulatory compliance.",
+      "nistAiRmfMapping": "GOVERN 4.1 — Organizational AI transparency practices, MAP 5.1",
+      "owaspMapping": "ML07 — Transfer Learning Attack (documentation gap)",
+      "mitreAtlasMapping": "AML.T0010 — ML Supply Chain Compromise (transparency gap)",
+      "threats": [
+        "Incomplete or missing model documentation",
+        "Unknown training data composition",
+        "Opaque model lineage and fine-tuning history",
+        "Missing license and usage restriction information",
+        "No reproducibility metadata",
+        "Lack of intended use and limitation documentation"
+      ],
+      "controls": [
+        "Model card generation and maintenance",
+        "AI/ML BOM creation (CycloneDX ML-BOM or SPDX AI)",
+        "Dataset documentation (Datasheets for Datasets)",
+        "Training data provenance records",
+        "License and usage restriction documentation",
+        "Environmental impact reporting"
+      ],
+      "tools": [
+        {
+          "name": "CycloneDX ML-BOM",
+          "foundation": "owasp",
+          "url": "https://cyclonedx.org/capabilities/mlbom/",
+          "description": "Extension of CycloneDX SBOM standard for ML — captures model architecture, datasets, training environment, hyperparameters, and performance metrics.",
+          "maturity": "draft",
+          "controlsCovered": ["AI/ML BOM creation (CycloneDX ML-BOM or SPDX AI)", "Training data provenance records"]
+        },
+        {
+          "name": "SPDX AI Profile",
+          "foundation": "lfai",
+          "url": "https://spdx.dev/use/ai/",
+          "description": "SPDX extension for AI/ML transparency — adds fields for model type, training data, metrics, known limitations, and safety information.",
+          "maturity": "draft",
+          "controlsCovered": ["AI/ML BOM creation (CycloneDX ML-BOM or SPDX AI)", "License and usage restriction documentation"]
+        },
+        {
+          "name": "Model Cards (Google)",
+          "foundation": "community",
+          "url": "https://modelcards.withgoogle.com",
+          "description": "Framework for documenting ML model performance, limitations, intended use, and ethical considerations — originated at Google Research.",
+          "maturity": "active",
+          "controlsCovered": ["Model card generation and maintenance", "License and usage restriction documentation"]
+        },
+        {
+          "name": "Hugging Face Model Cards",
+          "foundation": "community",
+          "url": "https://huggingface.co/docs/hub/model-cards",
+          "description": "Standardized model documentation on Hugging Face Hub — includes metadata YAML, model description, training details, and evaluation results.",
+          "maturity": "production",
+          "controlsCovered": ["Model card generation and maintenance", "Training data provenance records"]
+        },
+        {
+          "name": "Datasheets for Datasets",
+          "foundation": "community",
+          "url": "https://arxiv.org/abs/1803.09010",
+          "description": "Documentation framework for datasets (Gebru et al.) — standardizes how dataset creators communicate composition, collection, and intended uses.",
+          "maturity": "active",
+          "controlsCovered": ["Dataset documentation (Datasheets for Datasets)", "Training data provenance records"]
+        },
+        {
+          "name": "CoSAI Model Card Specification",
+          "foundation": "oasis",
+          "url": "https://www.coalitionforsecureai.org",
+          "description": "Coalition for Secure AI working on standardized security-focused model cards — includes adversarial testing results, known vulnerabilities, and supply chain metadata.",
+          "maturity": "forming",
+          "controlsCovered": ["Model card generation and maintenance", "AI/ML BOM creation (CycloneDX ML-BOM or SPDX AI)"]
+        },
+        {
+          "name": "CodeCarbon",
+          "foundation": "community",
+          "url": "https://codecarbon.io",
+          "description": "Tracks carbon emissions from computing — measures energy consumption and CO2 impact of model training for environmental impact reporting.",
+          "maturity": "active",
+          "controlsCovered": ["Environmental impact reporting"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "ML-BOM tooling",
+          "severity": "red",
+          "description": "CycloneDX ML-BOM and SPDX AI Profile exist in draft but automated tooling for generating ML-BOMs from training pipelines is virtually non-existent."
+        },
+        {
+          "title": "Model card enforcement",
+          "severity": "yellow",
+          "description": "Model cards are voluntary documentation. No model hub or registry enforces minimum documentation standards or validates model card completeness."
+        },
+        {
+          "title": "Training data transparency",
+          "severity": "red",
+          "description": "Most foundation model providers do not disclose full training data composition. No regulatory mechanism reliably compels transparency."
+        }
+      ]
+    },
+    {
+      "id": "deployment",
+      "number": 7,
+      "name": "Deployment & Runtime Security",
+      "shortName": "Deployment",
+      "icon": "🚀",
+      "description": "Securing AI model serving infrastructure, protecting against prompt injection, implementing guardrails, input/output filtering, and inference pipeline hardening.",
+      "nistAiRmfMapping": "MANAGE 2.2 — Mechanisms for monitoring and responding to AI risks in deployment",
+      "owaspMapping": "LLM01 — Prompt Injection, LLM02 — Insecure Output, LLM05 — Supply Chain Vulnerabilities, LLM06 — Sensitive Information Disclosure",
+      "mitreAtlasMapping": "AML.T0051 — LLM Prompt Injection, AML.T0054 — LLM Jailbreak, AML.T0040 — ML Model Inference API Access",
+      "threats": [
+        "Prompt injection attacks (direct and indirect)",
+        "Data exfiltration through model responses",
+        "Model denial of service (resource exhaustion)",
+        "Model theft via repeated API queries",
+        "Adversarial inputs in production traffic",
+        "Insecure inference pipeline dependencies"
+      ],
+      "controls": [
+        "Input validation and prompt sanitization",
+        "Output filtering and content safety checks",
+        "Rate limiting and usage quotas",
+        "Model access controls and authentication",
+        "Guardrails for content safety and topic control",
+        "Inference pipeline dependency scanning"
+      ],
+      "tools": [
+        {
+          "name": "NeMo Guardrails (NVIDIA)",
+          "foundation": "community",
+          "url": "https://github.com/NVIDIA/NeMo-Guardrails",
+          "description": "Programmable guardrails for LLM applications — controls topics, prevents jailbreaks, blocks harmful outputs, and enables custom safety policies.",
+          "maturity": "active",
+          "controlsCovered": ["Guardrails for content safety and topic control", "Output filtering and content safety checks", "Input validation and prompt sanitization"]
+        },
+        {
+          "name": "LLM Guard (Protect AI)",
+          "foundation": "community",
+          "url": "https://github.com/protectai/llm-guard",
+          "description": "Self-hosted toolkit for sanitizing LLM interactions — scans prompts and outputs for prompt injection, PII, toxicity, and banned content.",
+          "maturity": "active",
+          "controlsCovered": ["Input validation and prompt sanitization", "Output filtering and content safety checks"]
+        },
+        {
+          "name": "Guardrails AI",
+          "foundation": "community",
+          "url": "https://www.guardrailsai.com",
+          "description": "Framework for adding structural, type, and quality guarantees to LLM outputs — validates responses against schemas and safety policies.",
+          "maturity": "active",
+          "controlsCovered": ["Output filtering and content safety checks", "Guardrails for content safety and topic control"]
+        },
+        {
+          "name": "Rebuff",
+          "foundation": "community",
+          "url": "https://github.com/protectai/rebuff",
+          "description": "Self-hardening prompt injection detector — uses multi-layered defense including heuristics, LLM-based detection, and canary token injection.",
+          "maturity": "experimental",
+          "controlsCovered": ["Input validation and prompt sanitization"]
+        },
+        {
+          "name": "OWASP LLM Top 10",
+          "foundation": "owasp",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+          "description": "Definitive guide to the top 10 security risks for LLM applications — provides descriptions, examples, prevention strategies, and attack scenarios.",
+          "maturity": "active",
+          "controlsCovered": ["Input validation and prompt sanitization", "Output filtering and content safety checks", "Guardrails for content safety and topic control"]
+        },
+        {
+          "name": "LangKit (WhyLabs)",
+          "foundation": "community",
+          "url": "https://github.com/whylabs/langkit",
+          "description": "Open source text metrics toolkit for LLM monitoring — detects prompt injection, PII, toxicity, relevance, and sentiment in real-time.",
+          "maturity": "active",
+          "controlsCovered": ["Input validation and prompt sanitization", "Output filtering and content safety checks"]
+        },
+        {
+          "name": "Vigil",
+          "foundation": "community",
+          "url": "https://github.com/deadbits/vigil-llm",
+          "description": "LLM prompt injection detection tool — uses multiple detection methods including vector similarity, YARA rules, and ML classifiers.",
+          "maturity": "active",
+          "controlsCovered": ["Input validation and prompt sanitization"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Prompt injection defense maturity",
+          "severity": "red",
+          "description": "No defense reliably prevents all forms of prompt injection. Current tools reduce risk but determined attackers can still bypass guardrails."
+        },
+        {
+          "title": "Standardized guardrail specification",
+          "severity": "yellow",
+          "description": "Each guardrail framework has its own configuration format. No standard for defining, sharing, or composing safety policies across tools."
+        },
+        {
+          "title": "Agent/tool-use security",
+          "severity": "red",
+          "description": "LLM agents with tool access (code execution, API calls, file system) create new attack surfaces. No comprehensive framework secures agentic AI systems."
+        }
+      ]
+    },
+    {
+      "id": "monitoring",
+      "number": 8,
+      "name": "Monitoring, Governance & Response",
+      "shortName": "Governance",
+      "icon": "🛡️",
+      "description": "Continuous monitoring of deployed AI systems, drift detection, abuse monitoring, regulatory compliance, incident response for AI-specific threats, and governance frameworks.",
+      "nistAiRmfMapping": "MANAGE 3.1, 3.2, 4.1 — Continuous monitoring, incident response, compliance",
+      "owaspMapping": "ML09 — Output Integrity Attack, ML08 — Model Skewing",
+      "mitreAtlasMapping": "AML.T0031 — Erode ML Model Integrity, AML.T0024 — Exfiltration via ML Inference API",
+      "threats": [
+        "Model drift degrading accuracy over time",
+        "Data drift changing input distributions",
+        "Adversarial abuse at scale in production",
+        "Regulatory non-compliance (EU AI Act, etc.)",
+        "Model behavior regression after updates",
+        "Lack of incident response playbooks for AI"
+      ],
+      "controls": [
+        "Model performance and drift monitoring",
+        "Data drift detection and alerting",
+        "Abuse pattern detection and rate limiting",
+        "Regulatory compliance tracking (AI Act, etc.)",
+        "AI incident response playbooks",
+        "Model rollback and versioned deployment"
+      ],
+      "tools": [
+        {
+          "name": "Evidently AI",
+          "foundation": "community",
+          "url": "https://www.evidentlyai.com",
+          "description": "Open source ML observability platform — monitors data drift, model performance, target drift, and data quality with interactive dashboards.",
+          "maturity": "production",
+          "controlsCovered": ["Model performance and drift monitoring", "Data drift detection and alerting"]
+        },
+        {
+          "name": "WhyLabs / whylogs",
+          "foundation": "community",
+          "url": "https://github.com/whylabs/whylogs",
+          "description": "Data and ML monitoring library — profiles datasets and model outputs for drift detection, data quality monitoring, and anomaly detection.",
+          "maturity": "production",
+          "controlsCovered": ["Data drift detection and alerting", "Model performance and drift monitoring"]
+        },
+        {
+          "name": "NIST AI Risk Management Framework",
+          "foundation": "nist",
+          "url": "https://airc.nist.gov/AI_RMF_Playbook",
+          "description": "Comprehensive AI risk management framework — GOVERN, MAP, MEASURE, MANAGE functions for organizations deploying AI systems responsibly.",
+          "maturity": "standard",
+          "controlsCovered": ["Regulatory compliance tracking (AI Act, etc.)", "AI incident response playbooks"]
+        },
+        {
+          "name": "MITRE ATLAS",
+          "foundation": "mitre",
+          "url": "https://atlas.mitre.org",
+          "description": "Adversarial Threat Landscape for AI Systems — knowledge base of adversarial techniques, tactics, and case studies specific to ML systems.",
+          "maturity": "active",
+          "controlsCovered": ["AI incident response playbooks", "Abuse pattern detection and rate limiting"]
+        },
+        {
+          "name": "CoSAI (Coalition for Secure AI)",
+          "foundation": "oasis",
+          "url": "https://www.coalitionforsecureai.org",
+          "description": "OASIS collaboration developing comprehensive AI security frameworks — includes governance, risk assessment, and incident response standards.",
+          "maturity": "forming",
+          "controlsCovered": ["Regulatory compliance tracking (AI Act, etc.)", "AI incident response playbooks"]
+        },
+        {
+          "name": "AI Incident Database",
+          "foundation": "community",
+          "url": "https://incidentdatabase.ai",
+          "description": "Public database tracking AI incidents and controversies — enables pattern analysis and lessons learned for AI incident response.",
+          "maturity": "active",
+          "controlsCovered": ["AI incident response playbooks"]
+        },
+        {
+          "name": "ISO/IEC 42001 (AI Management System)",
+          "foundation": "community",
+          "url": "https://www.iso.org/standard/81230.html",
+          "description": "International standard for AI management systems — provides requirements for establishing, implementing, and improving AI governance within organizations.",
+          "maturity": "standard",
+          "controlsCovered": ["Regulatory compliance tracking (AI Act, etc.)"]
+        },
+        {
+          "name": "OWASP ML Top 10",
+          "foundation": "owasp",
+          "url": "https://owasp.org/www-project-machine-learning-security-top-10/",
+          "description": "Top 10 security risks for machine learning systems — covers input manipulation, data poisoning, model stealing, and supply chain attacks.",
+          "maturity": "active",
+          "controlsCovered": ["AI incident response playbooks", "Abuse pattern detection and rate limiting"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "AI-specific incident response",
+          "severity": "red",
+          "description": "No standardized incident response framework exists for AI-specific incidents (model poisoning, adversarial attacks, prompt injection at scale). Traditional IR doesn't apply."
+        },
+        {
+          "title": "EU AI Act compliance tooling",
+          "severity": "yellow",
+          "description": "EU AI Act is in effect but automated compliance checking and evidence generation tools are immature. Organizations must manually assess conformity."
+        },
+        {
+          "title": "Cross-org AI incident coordination",
+          "severity": "red",
+          "description": "No equivalent of CERT or CSAF for AI-specific incidents. When a foundation model has a security issue, no standard process coordinates response across downstream users."
+        },
+        {
+          "title": "Real-time adversarial detection at scale",
+          "severity": "yellow",
+          "description": "Detecting adversarial inputs in real-time production traffic without unacceptable latency overhead remains an unsolved engineering challenge."
+        }
+      ]
+    }
+  ],
+  "crossCuttingGaps": [
+    {
+      "title": "End-to-End AI Supply Chain Standard",
+      "severity": "red",
+      "phases": ["data", "training", "packaging", "registry", "evaluation", "aibom", "deployment", "monitoring"],
+      "description": "No equivalent of SLSA exists for AI. No framework provides graduated levels of supply chain security assurance across the full ML lifecycle from data to deployment."
+    },
+    {
+      "title": "Foundation Model Transparency",
+      "severity": "red",
+      "phases": ["data", "training", "aibom"],
+      "description": "Most foundation model providers do not disclose training data, training process details, or comprehensive safety evaluation results. Downstream users cannot assess supply chain risk."
+    },
+    {
+      "title": "AI Security Tooling Fragmentation",
+      "severity": "yellow",
+      "phases": ["evaluation", "deployment", "monitoring"],
+      "description": "Dozens of overlapping tools with different interfaces, configuration formats, and coverage gaps. No unified security pipeline spans evaluation through production monitoring."
+    },
+    {
+      "title": "Fine-Tuning Chain of Custody",
+      "severity": "red",
+      "phases": ["training", "packaging", "registry"],
+      "description": "Models are fine-tuned, merged, quantized, and distilled across organizations. No standard tracks the full provenance chain from base model through each transformation."
+    },
+    {
+      "title": "Agentic AI Security",
+      "severity": "red",
+      "phases": ["deployment", "monitoring"],
+      "description": "LLM agents with tool access (code execution, web browsing, API calls) create new supply chain attack surfaces that existing frameworks do not address."
+    },
+    {
+      "title": "Regulatory Alignment",
+      "severity": "yellow",
+      "phases": ["aibom", "monitoring"],
+      "description": "EU AI Act, NIST AI RMF, and other regulations have different requirements. No unified compliance framework maps across all regulatory regimes."
+    }
+  ],
+  "frameworks": [
+    {
+      "name": "NIST AI Risk Management Framework (AI RMF 1.0)",
+      "foundation": "nist",
+      "url": "https://airc.nist.gov/AI_RMF_Playbook",
+      "description": "Comprehensive voluntary framework for managing AI risks through GOVERN, MAP, MEASURE, and MANAGE functions. Aligned with US Executive Order on AI.",
+      "phases": ["data", "training", "evaluation", "aibom", "deployment", "monitoring"]
+    },
+    {
+      "name": "MITRE ATLAS (Adversarial Threat Landscape for AI Systems)",
+      "foundation": "mitre",
+      "url": "https://atlas.mitre.org",
+      "description": "Knowledge base of adversarial ML tactics and techniques — AI-specific extension of ATT&CK framework for understanding and defending against AI threats.",
+      "phases": ["data", "training", "packaging", "evaluation", "deployment", "monitoring"]
+    },
+    {
+      "name": "OWASP ML Top 10",
+      "foundation": "owasp",
+      "url": "https://owasp.org/www-project-machine-learning-security-top-10/",
+      "description": "Top 10 security risks for ML systems — input manipulation, data poisoning, model inversion, membership inference, model theft, and supply chain attacks.",
+      "phases": ["data", "training", "packaging", "evaluation", "deployment"]
+    },
+    {
+      "name": "OWASP Top 10 for LLM Applications",
+      "foundation": "owasp",
+      "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+      "description": "Top 10 risks specific to LLM-powered applications — prompt injection, insecure output handling, training data poisoning, model DoS, and supply chain vulnerabilities.",
+      "phases": ["data", "evaluation", "deployment", "monitoring"]
+    },
+    {
+      "name": "EU AI Act",
+      "foundation": "community",
+      "url": "https://artificialintelligenceact.eu",
+      "description": "European Union regulation on AI — risk-based classification system requiring conformity assessments, transparency obligations, and documentation for high-risk AI systems.",
+      "phases": ["data", "aibom", "evaluation", "deployment", "monitoring"]
+    },
+    {
+      "name": "ISO/IEC 42001 (AI Management System)",
+      "foundation": "community",
+      "url": "https://www.iso.org/standard/81230.html",
+      "description": "International standard for establishing, implementing, maintaining, and improving an AI management system within an organization.",
+      "phases": ["data", "training", "evaluation", "aibom", "deployment", "monitoring"]
+    },
+    {
+      "name": "Coalition for Secure AI (CoSAI)",
+      "foundation": "oasis",
+      "url": "https://www.coalitionforsecureai.org",
+      "description": "OASIS-hosted initiative bringing together industry leaders to develop practical AI security specifications and tools.",
+      "phases": ["training", "packaging", "evaluation", "deployment", "monitoring"]
+    }
+  ]
+}

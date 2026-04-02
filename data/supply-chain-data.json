@@ -1,0 +1,1130 @@
+{
+  "metadata": {
+    "title": "Open Source Supply Chain Security Landscape",
+    "version": "1.0.0",
+    "lastUpdated": "2026-03-31",
+    "description": "Comprehensive mapping of open source supply chain security tools, frameworks, and standards across all major foundations and phases.",
+    "unifiedModel": "Merges SLSA, S2C2F, SSDF, and CNCF SSC Best Practices into 8 lifecycle phases."
+  },
+  "foundations": {
+    "openssf": {
+      "name": "Open Source Security Foundation (OpenSSF)",
+      "url": "https://openssf.org",
+      "parent": "Linux Foundation",
+      "color": "#4B8BBE",
+      "abbr": "OpenSSF"
+    },
+    "cncf": {
+      "name": "Cloud Native Computing Foundation (CNCF)",
+      "url": "https://cncf.io",
+      "parent": "Linux Foundation",
+      "color": "#446ca9",
+      "abbr": "CNCF"
+    },
+    "oasis": {
+      "name": "OASIS Open",
+      "url": "https://www.oasis-open.org",
+      "parent": null,
+      "color": "#E97627",
+      "abbr": "OASIS"
+    },
+    "eclipse": {
+      "name": "Eclipse Foundation",
+      "url": "https://www.eclipse.org",
+      "parent": null,
+      "color": "#2C2255",
+      "abbr": "Eclipse"
+    },
+    "owasp": {
+      "name": "OWASP Foundation",
+      "url": "https://owasp.org",
+      "parent": null,
+      "color": "#404040",
+      "abbr": "OWASP"
+    },
+    "lf": {
+      "name": "Linux Foundation (top-level)",
+      "url": "https://www.linuxfoundation.org",
+      "parent": null,
+      "color": "#009639",
+      "abbr": "LF"
+    },
+    "ietf": {
+      "name": "Internet Engineering Task Force",
+      "url": "https://www.ietf.org",
+      "parent": null,
+      "color": "#1A5276",
+      "abbr": "IETF"
+    },
+    "community": {
+      "name": "Community / Independent Projects",
+      "url": null,
+      "parent": null,
+      "color": "#888888",
+      "abbr": "Community"
+    }
+  },
+  "phases": [
+    {
+      "id": "source",
+      "number": 1,
+      "name": "Source Code & Version Control",
+      "shortName": "Source",
+      "icon": "📝",
+      "description": "Securing source code repositories, enforcing access controls, branch protections, commit signing, and code review policies.",
+      "slsaMapping": "Threats A & B — unauthorized source change, compromised source repo",
+      "s2c2fMapping": "N/A (producer-side focus)",
+      "ssdfMapping": "PW — Produce Well-Secured Software",
+      "threats": [
+        "Unauthorized commit injection",
+        "Compromised developer credentials",
+        "Malicious code review bypass",
+        "Repository takeover / hijack",
+        "Force-push rewriting history",
+        "Insider threat — malicious maintainer"
+      ],
+      "controls": [
+        "Enforce branch protection rules",
+        "Require signed commits (GPG/SSH)",
+        "Multi-party code review",
+        "Repository access auditing",
+        "Secret scanning in commits",
+        "Namespace / delegation-based trust"
+      ],
+      "tools": [
+        {
+          "name": "gittuf",
+          "foundation": "openssf",
+          "url": "https://github.com/gittuf/gittuf",
+          "description": "Security layer for Git repositories using TUF-based delegation and trust policies for reference state verification.",
+          "maturity": "incubating",
+          "controlsCovered": ["Enforce branch protection rules", "Require signed commits (GPG/SSH)", "Namespace / delegation-based trust"]
+        },
+        {
+          "name": "OpenSSF Scorecard",
+          "foundation": "openssf",
+          "url": "https://securityscorecards.dev",
+          "description": "Automated security health metrics for open source projects — checks branch protection, CI tests, dependency updates, signed releases, and more.",
+          "maturity": "graduated",
+          "controlsCovered": ["Enforce branch protection rules", "Repository access auditing", "Multi-party code review"]
+        },
+        {
+          "name": "CII Best Practices Badge",
+          "foundation": "openssf",
+          "url": "https://www.bestpractices.dev",
+          "description": "Self-certification program for FLOSS projects meeting security, quality, and documentation best practices.",
+          "maturity": "graduated",
+          "controlsCovered": ["Repository access auditing", "Multi-party code review"]
+        },
+        {
+          "name": "OSPS Baseline",
+          "foundation": "openssf",
+          "url": "https://baseline.openssf.org",
+          "description": "Open Source Project Security Baseline — minimum security requirements for open source projects at different maturity levels.",
+          "maturity": "active",
+          "controlsCovered": ["Enforce branch protection rules", "Require signed commits (GPG/SSH)", "Multi-party code review", "Repository access auditing"]
+        },
+        {
+          "name": "Allstar",
+          "foundation": "openssf",
+          "url": "https://github.com/ossf/allstar",
+          "description": "GitHub App that continuously enforces security best practices on GitHub organizations and repositories.",
+          "maturity": "active",
+          "controlsCovered": ["Enforce branch protection rules", "Multi-party code review", "Repository access auditing"]
+        },
+        {
+          "name": "Minder",
+          "foundation": "openssf",
+          "url": "https://github.com/mindersec/minder",
+          "description": "Policy-as-code platform for enforcing security profiles across repositories, artifacts, and development workflows.",
+          "maturity": "sandbox",
+          "controlsCovered": ["Enforce branch protection rules", "Multi-party code review", "Repository access auditing"]
+        },
+        {
+          "name": "SARIF (Static Analysis Results Interchange Format)",
+          "foundation": "oasis",
+          "url": "https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif",
+          "description": "OASIS standard format for static analysis tool output interchange, enabling tool-agnostic code security findings.",
+          "maturity": "standard",
+          "controlsCovered": ["Repository access auditing"]
+        },
+        {
+          "name": "GitHub Secret Scanning",
+          "foundation": "community",
+          "url": "https://docs.github.com/en/code-security/secret-scanning",
+          "description": "Detects accidentally committed secrets, tokens, and credentials in repositories.",
+          "maturity": "production",
+          "controlsCovered": ["Secret scanning in commits"]
+        },
+        {
+          "name": "TruffleHog",
+          "foundation": "community",
+          "url": "https://github.com/trufflesecurity/trufflehog",
+          "description": "Open source secret detection tool scanning Git history, filesystems, and S3 buckets for high-entropy strings and credentials.",
+          "maturity": "production",
+          "controlsCovered": ["Secret scanning in commits"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Small project adoption barrier",
+          "severity": "yellow",
+          "description": "Most tools assume GitHub/GitLab with sophisticated CI. Small projects on self-hosted git or alternative forges lack equivalent protections."
+        },
+        {
+          "title": "Insider threat detection",
+          "severity": "red",
+          "description": "No open source tool effectively detects malicious maintainer behavior patterns (e.g., social engineering takeover like xz-utils)."
+        },
+        {
+          "title": "Cross-forge policy portability",
+          "severity": "yellow",
+          "description": "Allstar/Minder are GitHub-centric. No universal policy standard for GitLab, Gitea, Forgejo, Bitbucket."
+        }
+      ]
+    },
+    {
+      "id": "dependencies",
+      "number": 2,
+      "name": "Dependency Management & Ingestion",
+      "shortName": "Dependencies",
+      "icon": "📦",
+      "description": "Evaluating, selecting, and securely ingesting open source dependencies. Managing transitive risk, license compliance, and trusted sources.",
+      "slsaMapping": "Threats D & H — compromised dependency, typosquatting",
+      "s2c2fMapping": "Practice 1 (Ingest It), Practice 6 (Enforce It)",
+      "ssdfMapping": "PW.4 — Reuse Existing, Well-Secured Software",
+      "threats": [
+        "Typosquatting / dependency confusion",
+        "Compromised upstream package",
+        "Malicious transitive dependency",
+        "Abandoned / unmaintained dependency",
+        "License compliance violation",
+        "Protestware / self-sabotage"
+      ],
+      "controls": [
+        "Pin dependency versions with lockfiles",
+        "Evaluate dependency health before adoption",
+        "Use private registry mirrors / proxies",
+        "Enforce allowed-list / deny-list policies",
+        "Monitor dependency criticality",
+        "Automated license compliance checking"
+      ],
+      "tools": [
+        {
+          "name": "Criticality Score",
+          "foundation": "openssf",
+          "url": "https://github.com/ossf/criticality_score",
+          "description": "Quantifies the criticality/importance of open source projects based on usage, contributor activity, and dependency metrics.",
+          "maturity": "active",
+          "controlsCovered": ["Evaluate dependency health before adoption", "Monitor dependency criticality"]
+        },
+        {
+          "name": "Package Analysis",
+          "foundation": "openssf",
+          "url": "https://github.com/ossf/package-analysis",
+          "description": "Analyzes packages for malicious behavior by running them in sandboxed environments and monitoring system calls, network, and file activity.",
+          "maturity": "active",
+          "controlsCovered": ["Evaluate dependency health before adoption", "Enforce allowed-list / deny-list policies"]
+        },
+        {
+          "name": "Package Feeds",
+          "foundation": "openssf",
+          "url": "https://github.com/ossf/package-feeds",
+          "description": "Monitors package registries (npm, PyPI, RubyGems, etc.) for newly published packages to feed into Package Analysis.",
+          "maturity": "active",
+          "controlsCovered": ["Evaluate dependency health before adoption"]
+        },
+        {
+          "name": "S2C2F Specification",
+          "foundation": "openssf",
+          "url": "https://github.com/ossf/s2c2f",
+          "description": "Secure Supply Chain Consumption Framework — prescriptive guide with 8 practices and maturity levels for consuming open source securely.",
+          "maturity": "specification",
+          "controlsCovered": ["Pin dependency versions with lockfiles", "Evaluate dependency health before adoption", "Use private registry mirrors / proxies", "Enforce allowed-list / deny-list policies"]
+        },
+        {
+          "name": "OpenChain (ISO/IEC 5230)",
+          "foundation": "lf",
+          "url": "https://www.openchainproject.org",
+          "description": "International standard for open source license compliance programs — defines processes for managing OSS in supply chains.",
+          "maturity": "standard",
+          "controlsCovered": ["Automated license compliance checking"]
+        },
+        {
+          "name": "OWASP Dependency-Check",
+          "foundation": "owasp",
+          "url": "https://owasp.org/www-project-dependency-check/",
+          "description": "Detects publicly disclosed vulnerabilities in project dependencies by checking against NVD and other vulnerability databases.",
+          "maturity": "flagship",
+          "controlsCovered": ["Evaluate dependency health before adoption"]
+        },
+        {
+          "name": "OWASP SCVS (Software Component Verification Standard)",
+          "foundation": "owasp",
+          "url": "https://scvs.owasp.org",
+          "description": "Framework for identifying activities, controls, and best practices to verify the integrity and security of software components in the supply chain.",
+          "maturity": "incubating",
+          "controlsCovered": ["Pin dependency versions with lockfiles", "Evaluate dependency health before adoption", "Enforce allowed-list / deny-list policies"]
+        },
+        {
+          "name": "OWASP dep-scan",
+          "foundation": "owasp",
+          "url": "https://github.com/owasp-dep-scan/dep-scan",
+          "description": "Next-generation security audit tool supporting SBOMs, vulnerability scanning, and reachability analysis for multiple ecosystems.",
+          "maturity": "incubating",
+          "controlsCovered": ["Evaluate dependency health before adoption", "Automated license compliance checking"]
+        },
+        {
+          "name": "Eclipse Dash License Tool",
+          "foundation": "eclipse",
+          "url": "https://github.com/eclipse/dash-licenses",
+          "description": "Automated license compliance verification for Eclipse Foundation projects — checks dependencies against approved license lists.",
+          "maturity": "production",
+          "controlsCovered": ["Automated license compliance checking"]
+        },
+        {
+          "name": "Renovate",
+          "foundation": "community",
+          "url": "https://github.com/renovatebot/renovate",
+          "description": "Automated dependency update tool supporting 70+ package managers with configurable automerge, grouping, and scheduling policies.",
+          "maturity": "production",
+          "controlsCovered": ["Pin dependency versions with lockfiles"]
+        },
+        {
+          "name": "Socket.dev",
+          "foundation": "community",
+          "url": "https://socket.dev",
+          "description": "Detects supply chain attacks by analyzing package behavior rather than known vulnerabilities — catches typosquatting, install scripts, and obfuscation.",
+          "maturity": "production",
+          "controlsCovered": ["Evaluate dependency health before adoption", "Enforce allowed-list / deny-list policies"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Transitive dependency risk scoring",
+          "severity": "yellow",
+          "description": "Tools evaluate direct dependencies well but lack depth on transitive chains. No standard for cascading risk scores through dependency trees."
+        },
+        {
+          "title": "Protestware / self-sabotage detection",
+          "severity": "red",
+          "description": "No automated tooling reliably detects maintainer-initiated sabotage where code changes are intentional but malicious (e.g., colors.js, node-ipc)."
+        },
+        {
+          "title": "Cross-ecosystem policy enforcement",
+          "severity": "yellow",
+          "description": "Each package ecosystem (npm, PyPI, Maven, Go, Cargo) has different capabilities. No unified ingestion policy engine spans all."
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "number": 3,
+      "name": "Build & CI/CD Integrity",
+      "shortName": "Build",
+      "icon": "🔨",
+      "description": "Ensuring build systems are tamper-resistant, builds are reproducible, and CI/CD pipelines cannot be compromised to inject malicious code.",
+      "slsaMapping": "Threats C & E — modified source between review and build, compromised build platform",
+      "s2c2fMapping": "Practice 7 (Rebuild It)",
+      "ssdfMapping": "PW.6 — Configure Compilation, Interpreter, and Build Processes",
+      "threats": [
+        "Compromised build system / CI runner",
+        "Build script injection",
+        "Non-reproducible builds hiding tampering",
+        "Dependency substitution at build time",
+        "CI/CD secret exfiltration",
+        "Pipeline poisoning (PPE attacks)"
+      ],
+      "controls": [
+        "Hermetic, isolated build environments",
+        "Reproducible builds",
+        "Build provenance generation (SLSA)",
+        "CI/CD pipeline hardening",
+        "Build-time dependency pinning (lock + hash)",
+        "Ephemeral build environments"
+      ],
+      "tools": [
+        {
+          "name": "SLSA Framework",
+          "foundation": "openssf",
+          "url": "https://slsa.dev",
+          "description": "Supply-chain Levels for Software Artifacts — framework defining Build L1-L3 with requirements for provenance, isolation, and hardening.",
+          "maturity": "specification",
+          "controlsCovered": ["Hermetic, isolated build environments", "Build provenance generation (SLSA)", "Reproducible builds"]
+        },
+        {
+          "name": "SLSA GitHub Generator",
+          "foundation": "openssf",
+          "url": "https://github.com/slsa-framework/slsa-github-generator",
+          "description": "GitHub Actions workflows that generate SLSA Build L3 provenance for Go, container, and generic artifacts.",
+          "maturity": "active",
+          "controlsCovered": ["Build provenance generation (SLSA)", "Hermetic, isolated build environments"]
+        },
+        {
+          "name": "FRSCA (Factory for Repeatable Secure Creation of Artifacts)",
+          "foundation": "openssf",
+          "url": "https://github.com/buildsec/frsca",
+          "description": "Reference architecture for secure build pipelines using Tekton, in-toto, SPIFFE/SPIRE, and policy engines.",
+          "maturity": "experimental",
+          "controlsCovered": ["Hermetic, isolated build environments", "Build provenance generation (SLSA)", "CI/CD pipeline hardening"]
+        },
+        {
+          "name": "in-toto",
+          "foundation": "cncf",
+          "url": "https://in-toto.io",
+          "description": "Framework for securing the integrity of software supply chains by verifying that each step was performed as intended by authorized personnel.",
+          "maturity": "graduated",
+          "controlsCovered": ["Build provenance generation (SLSA)", "CI/CD pipeline hardening"]
+        },
+        {
+          "name": "Tekton Chains",
+          "foundation": "cncf",
+          "url": "https://tekton.dev/docs/chains/",
+          "description": "Kubernetes-native supply chain security — automatically signs Tekton TaskRun results and generates in-toto provenance attestations.",
+          "maturity": "active",
+          "controlsCovered": ["Build provenance generation (SLSA)", "Hermetic, isolated build environments"]
+        },
+        {
+          "name": "Witness",
+          "foundation": "community",
+          "url": "https://github.com/in-toto/witness",
+          "description": "Pluggable framework for supply chain attestation, building on in-toto — records evidence of each CI/CD step.",
+          "maturity": "active",
+          "controlsCovered": ["Build provenance generation (SLSA)", "CI/CD pipeline hardening"]
+        },
+        {
+          "name": "Reproducible Builds",
+          "foundation": "community",
+          "url": "https://reproducible-builds.org",
+          "description": "Cross-ecosystem initiative ensuring deterministic build outputs — enables independent verification that source maps to binary.",
+          "maturity": "active",
+          "controlsCovered": ["Reproducible builds"]
+        },
+        {
+          "name": "Buildpacks (Cloud Native)",
+          "foundation": "cncf",
+          "url": "https://buildpacks.io",
+          "description": "Transform application source into container images with standardized, auditable build processes — reduces Dockerfile attack surface.",
+          "maturity": "incubating",
+          "controlsCovered": ["Hermetic, isolated build environments", "Ephemeral build environments"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Non-GitHub build provenance",
+          "severity": "yellow",
+          "description": "SLSA provenance generators are mature for GitHub Actions but limited for GitLab CI, Jenkins, CircleCI, and self-hosted runners."
+        },
+        {
+          "title": "Reproducible builds at scale",
+          "severity": "yellow",
+          "description": "Despite years of effort, most ecosystems cannot achieve reproducible builds by default. Tooling exists but adoption is low."
+        },
+        {
+          "title": "CI/CD pipeline poisoning detection",
+          "severity": "red",
+          "description": "No comprehensive open source tool detects pipeline poisoning execution attacks (PPE) in CI configurations."
+        }
+      ]
+    },
+    {
+      "id": "signing",
+      "number": 4,
+      "name": "Artifact Signing & Provenance",
+      "shortName": "Signing",
+      "icon": "🔏",
+      "description": "Cryptographically signing artifacts and generating verifiable provenance attestations to prove authenticity and integrity of software artifacts.",
+      "slsaMapping": "Provenance requirements, Build L1-L3 track",
+      "s2c2fMapping": "Practice 5 (Audit It)",
+      "ssdfMapping": "PS.1/PS.2 — Protect Software",
+      "threats": [
+        "Artifact tampering post-build",
+        "Key compromise / stolen signing keys",
+        "Lack of provenance — cannot verify origin",
+        "Signature stripping attacks",
+        "Long-lived key management burden",
+        "Fake provenance / forged attestations"
+      ],
+      "controls": [
+        "Keyless code signing (short-lived certificates)",
+        "Transparency log for signatures",
+        "Provenance attestation (in-toto format)",
+        "Timestamp authority for signatures",
+        "Key management / rotation policies",
+        "Verification at consumption time"
+      ],
+      "tools": [
+        {
+          "name": "Sigstore",
+          "foundation": "openssf",
+          "url": "https://sigstore.dev",
+          "description": "Umbrella project for keyless signing infrastructure — consists of Cosign, Fulcio, and Rekor for signing, certificate issuance, and transparency logging.",
+          "maturity": "graduated",
+          "controlsCovered": ["Keyless code signing (short-lived certificates)", "Transparency log for signatures", "Timestamp authority for signatures"]
+        },
+        {
+          "name": "Cosign",
+          "foundation": "openssf",
+          "url": "https://github.com/sigstore/cosign",
+          "description": "Container signing, verification, and storage in an OCI registry. Supports keyless signing via OIDC identity.",
+          "maturity": "graduated",
+          "controlsCovered": ["Keyless code signing (short-lived certificates)", "Verification at consumption time"]
+        },
+        {
+          "name": "Fulcio",
+          "foundation": "openssf",
+          "url": "https://github.com/sigstore/fulcio",
+          "description": "Free root CA for code signing certificates — issues short-lived certificates bound to OIDC identities, eliminating long-lived key management.",
+          "maturity": "graduated",
+          "controlsCovered": ["Keyless code signing (short-lived certificates)", "Key management / rotation policies"]
+        },
+        {
+          "name": "Rekor",
+          "foundation": "openssf",
+          "url": "https://github.com/sigstore/rekor",
+          "description": "Tamper-resistant transparency log for recording signed metadata — provides an immutable, auditable record of signing events.",
+          "maturity": "graduated",
+          "controlsCovered": ["Transparency log for signatures", "Timestamp authority for signatures"]
+        },
+        {
+          "name": "The Update Framework (TUF)",
+          "foundation": "cncf",
+          "url": "https://theupdateframework.io",
+          "description": "Framework for securing software update systems through role-based signing, delegation, and key rotation — protects against various repository attacks.",
+          "maturity": "graduated",
+          "controlsCovered": ["Key management / rotation policies", "Verification at consumption time"]
+        },
+        {
+          "name": "Repository Service for TUF (RSTUF)",
+          "foundation": "openssf",
+          "url": "https://github.com/repository-service-tuf/repository-service-tuf",
+          "description": "Production-ready service implementing TUF repository operations — enables package registries to adopt TUF for secure distribution.",
+          "maturity": "incubating",
+          "controlsCovered": ["Key management / rotation policies", "Verification at consumption time"]
+        },
+        {
+          "name": "Notary / Notation",
+          "foundation": "cncf",
+          "url": "https://notaryproject.dev",
+          "description": "Standards-based container image signing supporting pluggable trust policies and OCI-native signature storage.",
+          "maturity": "incubating",
+          "controlsCovered": ["Keyless code signing (short-lived certificates)", "Verification at consumption time"]
+        },
+        {
+          "name": "Model Signing",
+          "foundation": "openssf",
+          "url": "https://github.com/sigstore/model-transparency",
+          "description": "Applies Sigstore-based signing to ML models — generates signing and provenance for AI/ML model artifacts.",
+          "maturity": "experimental",
+          "controlsCovered": ["Keyless code signing (short-lived certificates)", "Provenance attestation (in-toto format)"]
+        },
+        {
+          "name": "DPS (Device Provisioning Service) — OASIS",
+          "foundation": "oasis",
+          "url": "https://www.oasis-open.org",
+          "description": "OASIS standards for secure provisioning and attestation of device firmware/software — relevant for IoT supply chain signing.",
+          "maturity": "standard",
+          "controlsCovered": ["Provenance attestation (in-toto format)"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Cross-ecosystem signing adoption",
+          "severity": "yellow",
+          "description": "Sigstore is well-integrated for containers and Go/Python, but npm, Maven Central, Cargo, and RubyGems have varying levels of signing maturity."
+        },
+        {
+          "title": "AI/ML model provenance",
+          "severity": "red",
+          "description": "Model Signing is experimental. No production-ready standard for verifying ML model provenance, training data integrity, or fine-tuning chain of custody."
+        },
+        {
+          "title": "Consumer-side verification tooling",
+          "severity": "red",
+          "description": "Most verification requires manual integration. No turnkey solution for organizations to automatically verify all incoming artifact signatures and provenance."
+        }
+      ]
+    },
+    {
+      "id": "distribution",
+      "number": 5,
+      "name": "Package Distribution & Registry",
+      "shortName": "Distribution",
+      "icon": "🚀",
+      "description": "Securely distributing and hosting artifacts through registries, ensuring integrity during transit and storage, and protecting against registry-level attacks.",
+      "slsaMapping": "Threats F & G — upload modified package, compromise package registry",
+      "s2c2fMapping": "Practice 1 (Ingest It — registry mirror side)",
+      "ssdfMapping": "PS.1 — Protect Software / Archive and Protect Each Release",
+      "threats": [
+        "Registry compromise / account takeover",
+        "Package substitution in transit",
+        "Registry availability attacks (DoS)",
+        "Namespace squatting / hijacking",
+        "Stale / abandoned package takeover",
+        "Mirror desynchronization / poisoning"
+      ],
+      "controls": [
+        "Registry MFA / access controls",
+        "Package integrity verification (checksums + signatures)",
+        "Trusted registry mirrors / air-gapped distribution",
+        "Namespace protection policies",
+        "End-of-life / deprecation signaling",
+        "Content-addressable storage"
+      ],
+      "tools": [
+        {
+          "name": "Harbor",
+          "foundation": "cncf",
+          "url": "https://goharbor.io",
+          "description": "Enterprise-grade container registry with vulnerability scanning, content trust (Notary integration), replication, and RBAC.",
+          "maturity": "graduated",
+          "controlsCovered": ["Registry MFA / access controls", "Package integrity verification (checksums + signatures)", "Trusted registry mirrors / air-gapped distribution"]
+        },
+        {
+          "name": "TUF (for registries)",
+          "foundation": "cncf",
+          "url": "https://theupdateframework.io",
+          "description": "Provides secure update delivery for package registries — protects against replay, mix-and-match, and freeze attacks.",
+          "maturity": "graduated",
+          "controlsCovered": ["Package integrity verification (checksums + signatures)", "Content-addressable storage"]
+        },
+        {
+          "name": "Zarf",
+          "foundation": "openssf",
+          "url": "https://zarf.dev",
+          "description": "Declarative air-gap package manager — bundles K8s manifests, container images, and Helm charts for disconnected deployment.",
+          "maturity": "sandbox",
+          "controlsCovered": ["Trusted registry mirrors / air-gapped distribution"]
+        },
+        {
+          "name": "OpenEoX",
+          "foundation": "oasis",
+          "url": "https://github.com/oasis-tcs/openeox",
+          "description": "Open standard for communicating end-of-life and end-of-support information for software products.",
+          "maturity": "draft",
+          "controlsCovered": ["End-of-life / deprecation signaling"]
+        },
+        {
+          "name": "OCI Distribution Spec",
+          "foundation": "community",
+          "url": "https://github.com/opencontainers/distribution-spec",
+          "description": "Open Container Initiative specification for content-addressable artifact distribution — standard API for container registries.",
+          "maturity": "standard",
+          "controlsCovered": ["Content-addressable storage", "Package integrity verification (checksums + signatures)"]
+        },
+        {
+          "name": "Dragonfly",
+          "foundation": "cncf",
+          "url": "https://d7y.io",
+          "description": "P2P-based image and file distribution system — accelerates large-scale container image distribution with integrity verification.",
+          "maturity": "incubating",
+          "controlsCovered": ["Trusted registry mirrors / air-gapped distribution"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Universal registry tamper protection",
+          "severity": "yellow",
+          "description": "No universal mechanism for tamper-proof registries across npm, PyPI, Maven, RubyGems. Each ecosystem has ad-hoc protections."
+        },
+        {
+          "title": "Namespace squatting prevention",
+          "severity": "yellow",
+          "description": "No cross-ecosystem standard or tool for preventing namespace/package name squatting and typosquatting at registry level."
+        },
+        {
+          "title": "Non-container artifact registries",
+          "severity": "yellow",
+          "description": "Harbor, OCI spec, and most tooling targets containers. Registries for other artifact types (npm, PyPI, Maven) have fewer open source security options."
+        }
+      ]
+    },
+    {
+      "id": "scanning",
+      "number": 6,
+      "name": "Vulnerability Scanning & Analysis",
+      "shortName": "Scanning",
+      "icon": "🔍",
+      "description": "Identifying known vulnerabilities, generating advisories, assessing exploitability, and prioritizing remediation through automated scanning and analysis.",
+      "slsaMapping": "N/A (post-build consumer concern)",
+      "s2c2fMapping": "Practice 2 (Scan It)",
+      "ssdfMapping": "RV.1 — Identify and Confirm Vulnerabilities on an Ongoing Basis",
+      "threats": [
+        "Known vulnerabilities in dependencies",
+        "Zero-day vulnerabilities",
+        "False negatives in scanners",
+        "Alert fatigue from false positives",
+        "Delayed vulnerability disclosure",
+        "Incomplete vulnerability databases"
+      ],
+      "controls": [
+        "Continuous vulnerability scanning (SCA)",
+        "Vulnerability database aggregation (OSV)",
+        "Exploitability / reachability analysis",
+        "VEX (Vulnerability Exploitability eXchange)",
+        "Coordinated vulnerability disclosure",
+        "Fuzzing for unknown vulnerability discovery"
+      ],
+      "tools": [
+        {
+          "name": "OSV (Open Source Vulnerabilities) Schema",
+          "foundation": "community",
+          "url": "https://osv.dev",
+          "description": "Distributed vulnerability database and interchange format for open source — aggregates advisories from multiple ecosystems with precise version-range matching.",
+          "maturity": "production",
+          "controlsCovered": ["Vulnerability database aggregation (OSV)", "Continuous vulnerability scanning (SCA)"]
+        },
+        {
+          "name": "OSV-Scanner",
+          "foundation": "community",
+          "url": "https://github.com/google/osv-scanner",
+          "description": "Vulnerability scanner using the OSV database — scans lockfiles, SBOMs, and container images with ecosystem-native version semantics.",
+          "maturity": "production",
+          "controlsCovered": ["Continuous vulnerability scanning (SCA)", "Vulnerability database aggregation (OSV)"]
+        },
+        {
+          "name": "OpenVEX",
+          "foundation": "openssf",
+          "url": "https://openvex.dev",
+          "description": "Open implementation of the VEX (Vulnerability Exploitability eXchange) specification — enables publishers to communicate vulnerability exploitability status.",
+          "maturity": "active",
+          "controlsCovered": ["VEX (Vulnerability Exploitability eXchange)"]
+        },
+        {
+          "name": "CSAF 2.0 (Common Security Advisory Framework)",
+          "foundation": "oasis",
+          "url": "https://oasis-open.github.io/csaf-documentation/",
+          "description": "OASIS standard for machine-readable security advisories including VEX profiles — successor to CVRF, adopted by CISA.",
+          "maturity": "standard",
+          "controlsCovered": ["Coordinated vulnerability disclosure", "VEX (Vulnerability Exploitability eXchange)"]
+        },
+        {
+          "name": "Fuzz Introspector",
+          "foundation": "openssf",
+          "url": "https://github.com/ossf/fuzz-introspector",
+          "description": "Analyzes fuzz testing coverage and code reachability to improve fuzzer effectiveness — surfaces under-tested code paths.",
+          "maturity": "active",
+          "controlsCovered": ["Fuzzing for unknown vulnerability discovery"]
+        },
+        {
+          "name": "OSS-Fuzz",
+          "foundation": "community",
+          "url": "https://github.com/google/oss-fuzz",
+          "description": "Continuous fuzzing service for open source; has found 10,000+ bugs across 1,000+ projects. Free for open source projects.",
+          "maturity": "production",
+          "controlsCovered": ["Fuzzing for unknown vulnerability discovery"]
+        },
+        {
+          "name": "Trivy",
+          "foundation": "community",
+          "url": "https://trivy.dev",
+          "description": "Comprehensive vulnerability scanner for containers, filesystems, Git repos, and Kubernetes — supports OS packages, language libraries, and IaC misconfigs.",
+          "maturity": "production",
+          "controlsCovered": ["Continuous vulnerability scanning (SCA)"]
+        },
+        {
+          "name": "Grype",
+          "foundation": "community",
+          "url": "https://github.com/anchore/grype",
+          "description": "Vulnerability scanner for container images and filesystems — matches packages against multiple vulnerability databases.",
+          "maturity": "production",
+          "controlsCovered": ["Continuous vulnerability scanning (SCA)"]
+        },
+        {
+          "name": "SW360",
+          "foundation": "eclipse",
+          "url": "https://www.eclipse.org/sw360/",
+          "description": "Software component catalogue and license management — tracks components, vulnerabilities, and license obligations across the organization.",
+          "maturity": "production",
+          "controlsCovered": ["Continuous vulnerability scanning (SCA)", "Coordinated vulnerability disclosure"]
+        },
+        {
+          "name": "CoSAI (Coalition for Secure AI)",
+          "foundation": "oasis",
+          "url": "https://www.coalitionforsecureai.org",
+          "description": "OASIS collaboration developing frameworks for AI security assessment — includes supply chain security for AI/ML models and training data.",
+          "maturity": "forming",
+          "controlsCovered": ["Exploitability / reachability analysis"]
+        },
+        {
+          "name": "OHDF (OASIS Heimdall Data Format)",
+          "foundation": "oasis",
+          "url": "https://saf.mitre.org",
+          "description": "Standardized format for security assessment results — normalizes output from multiple security tools for unified analysis.",
+          "maturity": "active",
+          "controlsCovered": ["Continuous vulnerability scanning (SCA)"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Reachability / exploitability analysis",
+          "severity": "yellow",
+          "description": "Most scanners report all CVEs regardless of whether vulnerable code is actually reachable. Reachability analysis is nascent and per-ecosystem."
+        },
+        {
+          "title": "AI/ML model vulnerability scanning",
+          "severity": "red",
+          "description": "No open source scanner can assess ML models for adversarial vulnerabilities, poisoned training data, or backdoors. CoSAI is pre-production."
+        },
+        {
+          "title": "VEX adoption and tooling",
+          "severity": "yellow",
+          "description": "VEX/OpenVEX/CSAF standards exist but producer-side adoption is minimal. Most software vendors don't publish VEX documents."
+        }
+      ]
+    },
+    {
+      "id": "sbom",
+      "number": 7,
+      "name": "SBOM & Inventory Management",
+      "shortName": "SBOM",
+      "icon": "📋",
+      "description": "Generating, distributing, consuming, and managing Software Bills of Materials for software transparency, compliance, and vulnerability management.",
+      "slsaMapping": "N/A (complementary to provenance)",
+      "s2c2fMapping": "Practice 3 (Inventory It)",
+      "ssdfMapping": "PS.3 — Provide a Mechanism for Verifying Software Integrity / SBOM",
+      "threats": [
+        "Incomplete or inaccurate SBOM",
+        "SBOM format fragmentation (SPDX vs CycloneDX)",
+        "SBOM not kept in sync with releases",
+        "Inability to consume SBOMs at scale",
+        "Missing transitive dependency information",
+        "SBOM quality — no fitness scoring"
+      ],
+      "controls": [
+        "Automated SBOM generation in CI/CD",
+        "SBOM format standardization",
+        "SBOM distribution alongside artifacts",
+        "SBOM consumption and querying platform",
+        "SBOM quality / completeness scoring",
+        "Linking SBOMs to vulnerability data"
+      ],
+      "tools": [
+        {
+          "name": "SPDX (ISO/IEC 5962)",
+          "foundation": "lf",
+          "url": "https://spdx.dev",
+          "description": "International standard for software bill of materials — defines format for communicating component information including licensing, security, and provenance.",
+          "maturity": "standard",
+          "controlsCovered": ["SBOM format standardization", "Automated SBOM generation in CI/CD"]
+        },
+        {
+          "name": "CycloneDX",
+          "foundation": "owasp",
+          "url": "https://cyclonedx.org",
+          "description": "Lightweight SBOM standard for application security contexts — supports software, hardware, SaaSBOM, ML-BOM, and VEX in a single format.",
+          "maturity": "standard",
+          "controlsCovered": ["SBOM format standardization", "Automated SBOM generation in CI/CD", "Linking SBOMs to vulnerability data"]
+        },
+        {
+          "name": "bomctl",
+          "foundation": "openssf",
+          "url": "https://github.com/bomctl/bomctl",
+          "description": "Format-agnostic SBOM tooling — merge, diff, filter, and transform SBOMs across SPDX and CycloneDX formats.",
+          "maturity": "sandbox",
+          "controlsCovered": ["SBOM format standardization", "SBOM consumption and querying platform"]
+        },
+        {
+          "name": "protobom",
+          "foundation": "openssf",
+          "url": "https://github.com/protobom/protobom",
+          "description": "Protocol buffer-based SBOM interchange library — enables lossless translation between SPDX and CycloneDX formats.",
+          "maturity": "sandbox",
+          "controlsCovered": ["SBOM format standardization"]
+        },
+        {
+          "name": "SBOMit",
+          "foundation": "openssf",
+          "url": "https://github.com/sbomit",
+          "description": "SBOM attestation and integrity framework — links SBOMs to build provenance using in-toto attestations.",
+          "maturity": "experimental",
+          "controlsCovered": ["SBOM distribution alongside artifacts", "Linking SBOMs to vulnerability data"]
+        },
+        {
+          "name": "GUAC (Graph for Understanding Artifact Composition)",
+          "foundation": "openssf",
+          "url": "https://guac.sh",
+          "description": "Knowledge graph aggregating SBOMs, SLSA provenance, OpenVEX, Scorecard, and vulnerability data into a queryable supply chain intelligence platform.",
+          "maturity": "incubating",
+          "controlsCovered": ["SBOM consumption and querying platform", "Linking SBOMs to vulnerability data"]
+        },
+        {
+          "name": "OWASP Dependency-Track",
+          "foundation": "owasp",
+          "url": "https://dependencytrack.org",
+          "description": "Continuous SBOM analysis platform — ingests SBOMs, tracks components across portfolio, identifies vulnerabilities, and manages policy compliance.",
+          "maturity": "flagship",
+          "controlsCovered": ["SBOM consumption and querying platform", "Linking SBOMs to vulnerability data", "SBOM quality / completeness scoring"]
+        },
+        {
+          "name": "Syft",
+          "foundation": "community",
+          "url": "https://github.com/anchore/syft",
+          "description": "CLI tool for generating SBOMs from container images and filesystems — supports SPDX and CycloneDX output formats.",
+          "maturity": "production",
+          "controlsCovered": ["Automated SBOM generation in CI/CD"]
+        },
+        {
+          "name": "Tern",
+          "foundation": "community",
+          "url": "https://github.com/tern-tools/tern",
+          "description": "Container image inspector generating SBOMs by analyzing image layers and package managers.",
+          "maturity": "active",
+          "controlsCovered": ["Automated SBOM generation in CI/CD"]
+        },
+        {
+          "name": "OSIM (Open Supplychain Information Modeling)",
+          "foundation": "oasis",
+          "url": "https://www.oasis-open.org",
+          "description": "OASIS initiative for unified supply chain information modeling — harmonizes SBOM, VEX, CSAF, and related standards.",
+          "maturity": "forming",
+          "controlsCovered": ["SBOM format standardization"]
+        },
+        {
+          "name": "VSMI (Vulnerability Severity Metadata Index)",
+          "foundation": "oasis",
+          "url": "https://www.oasis-open.org",
+          "description": "OASIS work on standardizing vulnerability severity communication within SBOM/advisory ecosystems.",
+          "maturity": "draft",
+          "controlsCovered": ["Linking SBOMs to vulnerability data"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "SBOM quality scoring",
+          "severity": "yellow",
+          "description": "No widely adopted standard for SBOM completeness/quality scoring. Consumers cannot assess whether an SBOM is trustworthy or complete."
+        },
+        {
+          "title": "SPDX vs CycloneDX fragmentation",
+          "severity": "yellow",
+          "description": "Two competing standards create tooling fragmentation. Translation tools (bomctl, protobom) help but are not yet mature."
+        },
+        {
+          "title": "SBOM consumption at enterprise scale",
+          "severity": "yellow",
+          "description": "Generating SBOMs is increasingly automated; consuming, storing, querying, and acting on thousands of SBOMs is still challenging."
+        },
+        {
+          "title": "AI/ML BOM maturity",
+          "severity": "red",
+          "description": "CycloneDX ML-BOM exists in draft but tooling for generating ML-BOMs (model cards, training data, hyperparameters) is virtually non-existent."
+        }
+      ]
+    },
+    {
+      "id": "monitoring",
+      "number": 8,
+      "name": "Monitoring, Update & Incident Response",
+      "shortName": "Monitor & Respond",
+      "icon": "🛡️",
+      "description": "Continuous monitoring of deployed software, automated patching/updates, incident response for supply chain attacks, and upstream fix contribution.",
+      "slsaMapping": "Availability threats",
+      "s2c2fMapping": "Practice 4 (Update It), Practice 8 (Fix + Upstream)",
+      "ssdfMapping": "RV.2/RV.3 — Assess, Prioritize, Remediate Vulnerabilities / Analyze Vulnerabilities",
+      "threats": [
+        "Delayed patching of known vulnerabilities",
+        "Regression from updates",
+        "Lack of coordinated incident response",
+        "No visibility into deployed component versions",
+        "Supply chain attack propagation",
+        "Unclear responsibility for OSS fixes"
+      ],
+      "controls": [
+        "Automated dependency updates",
+        "Deployment inventory tracking",
+        "Supply chain incident response playbooks",
+        "Coordinated disclosure processes",
+        "Runtime supply chain monitoring",
+        "Upstream fix contribution processes"
+      ],
+      "tools": [
+        {
+          "name": "Alpha-Omega",
+          "foundation": "openssf",
+          "url": "https://openssf.org/community/alpha-omega/",
+          "description": "OpenSSF project improving security of critical open source projects — Alpha targets top-critical projects, Omega scales security analysis across ecosystems.",
+          "maturity": "active",
+          "controlsCovered": ["Upstream fix contribution processes"]
+        },
+        {
+          "name": "OpenSSF Guides",
+          "foundation": "openssf",
+          "url": "https://openssf.org/resources/guides/",
+          "description": "Collection of practical guides including coordinated vulnerability disclosure, npm security, evaluating OSS, and incident response.",
+          "maturity": "active",
+          "controlsCovered": ["Coordinated disclosure processes", "Supply chain incident response playbooks"]
+        },
+        {
+          "name": "CACAO (Collaborative Automated Course of Action Operations)",
+          "foundation": "oasis",
+          "url": "https://www.oasis-open.org/committees/cacao/",
+          "description": "OASIS standard for security playbook automation — defines machine-readable workflows for incident response, threat mitigation, and remediation.",
+          "maturity": "standard",
+          "controlsCovered": ["Supply chain incident response playbooks"]
+        },
+        {
+          "name": "OpenC2",
+          "foundation": "oasis",
+          "url": "https://openc2.org",
+          "description": "OASIS standard for command-and-control of cyber defense components — enables automated, interoperable response actions across security tools.",
+          "maturity": "standard",
+          "controlsCovered": ["Supply chain incident response playbooks", "Runtime supply chain monitoring"]
+        },
+        {
+          "name": "STIX/TAXII",
+          "foundation": "oasis",
+          "url": "https://oasis-open.github.io/cti-documentation/",
+          "description": "Standards for cyber threat intelligence sharing — STIX defines threat information structure, TAXII defines transport protocol.",
+          "maturity": "standard",
+          "controlsCovered": ["Coordinated disclosure processes", "Supply chain incident response playbooks"]
+        },
+        {
+          "name": "OCA (Open Cybersecurity Alliance)",
+          "foundation": "oasis",
+          "url": "https://opencybersecurityalliance.org",
+          "description": "OASIS initiative for interoperable security tooling — includes Kestrel threat hunting language and security tool integration standards.",
+          "maturity": "active",
+          "controlsCovered": ["Runtime supply chain monitoring"]
+        },
+        {
+          "name": "SCITT (Supply Chain Integrity, Transparency, and Trust)",
+          "foundation": "ietf",
+          "url": "https://scitt.io",
+          "description": "IETF architecture for transparent, auditable supply chain claims — provides append-only transparency registry for all supply chain metadata.",
+          "maturity": "draft",
+          "controlsCovered": ["Deployment inventory tracking", "Runtime supply chain monitoring"]
+        },
+        {
+          "name": "Renovate",
+          "foundation": "community",
+          "url": "https://github.com/renovatebot/renovate",
+          "description": "Automated dependency update tool — creates merge requests for outdated dependencies across 70+ package managers.",
+          "maturity": "production",
+          "controlsCovered": ["Automated dependency updates"]
+        },
+        {
+          "name": "Dependabot",
+          "foundation": "community",
+          "url": "https://github.com/dependabot",
+          "description": "GitHub-native automated dependency update and security alert service — creates PRs for vulnerable and outdated dependencies.",
+          "maturity": "production",
+          "controlsCovered": ["Automated dependency updates"]
+        },
+        {
+          "name": "Falco",
+          "foundation": "cncf",
+          "url": "https://falco.org",
+          "description": "Cloud-native runtime security — detects unexpected behaviors, intrusions, and supply chain attacks at runtime using eBPF/kernel module.",
+          "maturity": "graduated",
+          "controlsCovered": ["Runtime supply chain monitoring"]
+        },
+        {
+          "name": "Kyverno",
+          "foundation": "cncf",
+          "url": "https://kyverno.io",
+          "description": "Kubernetes-native policy engine — enforces image signature verification, SBOM requirements, and supply chain policies at admission time.",
+          "maturity": "incubating",
+          "controlsCovered": ["Runtime supply chain monitoring", "Deployment inventory tracking"]
+        }
+      ],
+      "gaps": [
+        {
+          "title": "Multi-org coordinated response",
+          "severity": "red",
+          "description": "No open standard or tool for coordinating supply chain incident response across multiple organizations simultaneously (e.g., log4shell-scale events)."
+        },
+        {
+          "title": "Deployed component inventory",
+          "severity": "yellow",
+          "description": "Runtime SBOM tracking (what's actually deployed vs. what was built) is largely unsolved. SCITT is promising but still in IETF draft."
+        },
+        {
+          "title": "End-to-end policy enforcement",
+          "severity": "yellow",
+          "description": "No unified policy-as-code engine spans all 8 phases. Kyverno/OPA cover runtime; Minder covers source; nothing connects them."
+        },
+        {
+          "title": "Small project incident capacity",
+          "severity": "red",
+          "description": "Most small OSS projects have zero incident response capacity. Alpha-Omega covers top projects but thousands of critical small projects are unprotected."
+        }
+      ]
+    }
+  ],
+  "crossCuttingGaps": [
+    {
+      "title": "AI/ML Supply Chain Security",
+      "severity": "red",
+      "phases": ["signing", "scanning", "sbom"],
+      "description": "Almost no production tooling exists for model provenance, training data integrity, model poisoning detection, or ML-BOM generation. CoSAI and Model Signing are early-stage."
+    },
+    {
+      "title": "Consumer-Side Verification at Scale",
+      "severity": "red",
+      "phases": ["signing", "distribution", "sbom"],
+      "description": "Most tools focus on producers (sign, generate SBOM, create provenance). Consumer-side automated verification of all incoming artifacts at enterprise scale is underdeveloped."
+    },
+    {
+      "title": "Small Project Adoption",
+      "severity": "yellow",
+      "phases": ["source", "build", "signing", "monitoring"],
+      "description": "Most tools assume CI/CD sophistication, GitHub ecosystem, and dedicated security resources. Thousands of critical small projects cannot adopt these tools."
+    },
+    {
+      "title": "Cross-Ecosystem Consistency",
+      "severity": "yellow",
+      "phases": ["dependencies", "signing", "distribution"],
+      "description": "Each package ecosystem (npm, PyPI, Maven, Go, Cargo, RubyGems) has different security capabilities. No unified standard spans all ecosystems."
+    },
+    {
+      "title": "End-to-End Policy Engine",
+      "severity": "yellow",
+      "phases": ["source", "build", "signing", "distribution", "scanning", "sbom", "monitoring"],
+      "description": "No single policy-as-code system covers the entire supply chain. Tools cover individual phases but nothing connects them into a unified enforcement pipeline."
+    },
+    {
+      "title": "Standard Interoperability",
+      "severity": "yellow",
+      "phases": ["scanning", "sbom"],
+      "description": "SPDX vs CycloneDX fragmentation, CSAF vs OSV for advisories, and multiple VEX formats create integration overhead. Translation tools exist but are immature."
+    }
+  ],
+  "frameworks": [
+    {
+      "name": "SLSA (Supply-chain Levels for Software Artifacts)",
+      "foundation": "openssf",
+      "url": "https://slsa.dev",
+      "description": "Graduated framework with Build L1-L3 levels providing increasing assurances about build integrity and provenance.",
+      "phases": ["source", "build", "signing"]
+    },
+    {
+      "name": "S2C2F (Secure Supply Chain Consumption Framework)",
+      "foundation": "openssf",
+      "url": "https://github.com/ossf/s2c2f",
+      "description": "8-practice framework for securely consuming open source: Ingest, Scan, Inventory, Update, Audit, Enforce, Rebuild, Fix+Upstream.",
+      "phases": ["dependencies", "scanning", "sbom", "monitoring", "build"]
+    },
+    {
+      "name": "SSDF (Secure Software Development Framework, NIST SP 800-218)",
+      "foundation": "community",
+      "url": "https://csrc.nist.gov/Projects/ssdf",
+      "description": "NIST framework defining secure software development practices aligned to US executive order requirements.",
+      "phases": ["source", "build", "signing", "distribution", "scanning", "sbom", "monitoring"]
+    },
+    {
+      "name": "CNCF Software Supply Chain Best Practices",
+      "foundation": "cncf",
+      "url": "https://github.com/cncf/tag-security/blob/main/supply-chain-security/supply-chain-security-paper/CNCF_SSCP_v1.pdf",
+      "description": "White paper defining supply chain security best practices for cloud-native ecosystems.",
+      "phases": ["source", "dependencies", "build", "signing", "distribution", "scanning", "sbom", "monitoring"]
+    },
+    {
+      "name": "OWASP SCVS (Software Component Verification Standard)",
+      "foundation": "owasp",
+      "url": "https://scvs.owasp.org",
+      "description": "Framework for verifying the integrity and security of software components across the supply chain.",
+      "phases": ["dependencies", "scanning", "sbom"]
+    }
+  ]
+}
