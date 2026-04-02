@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI / ML Supply Chain Security Landscape</title>
+<style>
+  :root, [data-theme="dark"] {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --bg-card-hover: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-bright: #ffffff;
+    --accent: #a78bfa;
+    --accent-dim: #7c3aed;
+    --red: #f85149;
+    --red-bg: rgba(248,81,73,0.15);
+    --yellow: #d29922;
+    --yellow-bg: rgba(210,153,34,0.15);
+    --green: #3fb950;
+    --green-bg: rgba(63,185,80,0.15);
+    --openssf: #4B8BBE;
+    --oasis: #E97627;
+    --owasp: #8c8c8c;
+    --nist: #2E7D32;
+    --mlcommons: #7B1FA2;
+    --mitre: #C62828;
+    --lfai: #009639;
+    --community: #888888;
+    --shadow: rgba(0,0,0,0.4);
+    --header-gradient-start: #161b22;
+  }
+  [data-theme="light"] {
+    --bg: #f6f8fa;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f0f3f6;
+    --border: #d0d7de;
+    --text: #1f2328;
+    --text-dim: #656d76;
+    --text-bright: #000000;
+    --accent: #7c3aed;
+    --accent-dim: #5b21b6;
+    --red: #cf222e;
+    --red-bg: rgba(207,34,46,0.1);
+    --yellow: #9a6700;
+    --yellow-bg: rgba(154,103,0,0.1);
+    --green: #1a7f37;
+    --green-bg: rgba(26,127,55,0.1);
+    --openssf: #2b6cb0;
+    --oasis: #c05621;
+    --owasp: #4a5568;
+    --nist: #1B5E20;
+    --mlcommons: #6A1B9A;
+    --mitre: #B71C1C;
+    --lfai: #276749;
+    --community: #718096;
+    --shadow: rgba(0,0,0,0.1);
+    --header-gradient-start: #edf2f7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    padding: 24px 32px 16px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--header-gradient-start) 0%, var(--bg) 100%);
+  }
+  .header h1 { font-size: 28px; font-weight: 700; color: var(--text-bright); margin-bottom: 6px; }
+  .header .subtitle { color: var(--text-dim); font-size: 14px; max-width: 800px; margin: 0 auto 12px; }
+  .header .legend {
+    display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 8px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-dim);
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+  }
+  .nav-link {
+    display: inline-block; margin-top: 12px; font-size: 13px;
+    color: var(--accent); text-decoration: none; padding: 6px 16px;
+    border: 1px solid var(--accent); border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .nav-link:hover { background: var(--accent-dim); color: #fff; border-color: var(--accent-dim); }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex; justify-content: center; gap: 4px; padding: 12px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .tab-btn {
+    padding: 8px 18px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-dim); border-radius: 6px; cursor: pointer; font-size: 13px;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { background: var(--bg-card); color: var(--text); }
+  .tab-btn.active {
+    background: var(--accent-dim); color: var(--text-bright);
+    border-color: var(--accent);
+  }
+
+  /* Search / Filter Bar */
+  .filter-bar {
+    display: flex; justify-content: center; gap: 12px; padding: 12px 32px;
+    flex-wrap: wrap; align-items: center;
+  }
+  .filter-bar input {
+    padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text); font-size: 13px; width: 280px;
+    outline: none;
+  }
+  .filter-bar input:focus { border-color: var(--accent); }
+  .filter-bar select {
+    padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text); font-size: 13px; outline: none;
+    cursor: pointer;
+  }
+  .filter-bar select:focus { border-color: var(--accent); }
+
+  /* Views */
+  .view { display: none; padding: 24px 32px; }
+  .view.active { display: block; }
+
+  /* ===== PIPELINE VIEW ===== */
+  #pipeline-view { max-width: 1400px; margin: 0 auto; }
+  .pipeline {
+    display: flex; align-items: stretch; gap: 0;
+    overflow-x: auto; padding: 20px 0;
+  }
+  .phase-node {
+    flex: 0 0 auto; width: 155px; min-height: 140px;
+    background: var(--bg-card); border: 2px solid var(--border);
+    border-radius: 12px; padding: 14px 12px; text-align: center;
+    cursor: pointer; transition: all 0.25s; position: relative;
+  }
+  .phase-node:hover {
+    border-color: var(--accent); background: var(--bg-card-hover);
+    transform: translateY(-4px); box-shadow: 0 6px 20px var(--shadow);
+  }
+  .phase-node.selected {
+    border-color: var(--accent); background: var(--bg-card-hover);
+    box-shadow: 0 0 0 3px rgba(167,139,250,0.2);
+  }
+  .phase-icon { font-size: 28px; margin-bottom: 6px; }
+  .phase-number {
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .phase-name {
+    font-size: 13px; font-weight: 600; color: var(--text-bright);
+    margin: 4px 0;
+  }
+  .phase-stats {
+    display: flex; justify-content: center; gap: 8px; margin-top: 8px;
+  }
+  .stat-badge {
+    font-size: 10px; padding: 2px 7px; border-radius: 10px;
+    font-weight: 600;
+  }
+  .stat-tools { background: var(--green-bg); color: var(--green); }
+  .stat-gaps-r { background: var(--red-bg); color: var(--red); }
+  .stat-gaps-y { background: var(--yellow-bg); color: var(--yellow); }
+  .arrow {
+    flex: 0 0 30px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); font-size: 20px;
+  }
+
+  /* Detail Panel */
+  .detail-panel {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; margin-top: 24px; padding: 24px;
+    display: none; animation: fadeIn 0.3s ease;
+  }
+  .detail-panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .detail-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .detail-header .phase-icon { font-size: 36px; margin: 0; }
+  .detail-header h2 { font-size: 20px; color: var(--text-bright); }
+  .detail-desc { color: var(--text-dim); font-size: 14px; margin-bottom: 8px; }
+  .detail-mapping {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .mapping-badge {
+    font-size: 11px; padding: 4px 10px; border-radius: 6px;
+    background: rgba(167,139,250,0.1); color: var(--accent); border: 1px solid rgba(167,139,250,0.2);
+  }
+
+  .detail-section { margin-top: 20px; }
+  .detail-section h3 {
+    font-size: 15px; color: var(--text-bright); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .detail-section h3 .count-badge {
+    font-size: 11px; background: var(--accent-dim); color: #fff;
+    padding: 1px 8px; border-radius: 10px;
+  }
+
+  /* Threat list */
+  .threat-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;
+  }
+  .threat-item {
+    font-size: 13px; color: var(--text); padding: 8px 12px;
+    background: rgba(248,81,73,0.06); border-left: 3px solid var(--red);
+    border-radius: 4px;
+  }
+
+  /* Control list */
+  .control-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;
+  }
+  .control-item {
+    font-size: 13px; color: var(--text); padding: 8px 12px;
+    background: rgba(63,185,80,0.06); border-left: 3px solid var(--green);
+    border-radius: 4px;
+  }
+
+  /* Tool cards */
+  .tool-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px;
+  }
+  .tool-card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px;
+    transition: border-color 0.2s;
+  }
+  .tool-card:hover { border-color: var(--accent); }
+  .tool-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .tool-card-title {
+    font-size: 14px; font-weight: 600; color: var(--text-bright);
+  }
+  .tool-card-title a {
+    color: var(--accent); text-decoration: none;
+  }
+  .tool-card-title a:hover { text-decoration: underline; }
+  .foundation-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px;
+    border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+    color: #fff;
+  }
+  .badge-openssf { background: var(--openssf); }
+  .badge-oasis { background: var(--oasis); }
+  .badge-owasp { background: var(--owasp); }
+  .badge-nist { background: var(--nist); }
+  .badge-mlcommons { background: var(--mlcommons); }
+  .badge-mitre { background: var(--mitre); }
+  .badge-lfai { background: var(--lfai); }
+  .badge-community { background: var(--community); }
+  .tool-card-desc { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+  .tool-card-meta {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .maturity-badge {
+    font-size: 10px; padding: 2px 7px; border-radius: 8px;
+    background: rgba(167,139,250,0.1); color: var(--accent);
+    border: 1px solid rgba(167,139,250,0.15);
+  }
+  .controls-covered {
+    font-size: 10px; padding: 2px 7px; border-radius: 8px;
+    background: rgba(63,185,80,0.08); color: var(--green);
+    border: 1px solid rgba(63,185,80,0.15);
+  }
+
+  /* Gap cards */
+  .gap-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px;
+  }
+  .gap-card {
+    padding: 14px; border-radius: 8px; border: 1px solid;
+  }
+  .gap-card.red { background: var(--red-bg); border-color: rgba(248,81,73,0.3); }
+  .gap-card.yellow { background: var(--yellow-bg); border-color: rgba(210,153,34,0.3); }
+  .gap-card-title {
+    font-size: 14px; font-weight: 600; margin-bottom: 4px;
+  }
+  .gap-card.red .gap-card-title { color: var(--red); }
+  .gap-card.yellow .gap-card-title { color: var(--yellow); }
+  .gap-card-desc { font-size: 12px; color: var(--text-dim); }
+  .gap-severity-indicator {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 4px;
+  }
+  .gap-severity-indicator.red { background: var(--red); }
+  .gap-severity-indicator.yellow { background: var(--yellow); }
+
+  /* ===== HEATMAP VIEW ===== */
+  #heatmap-view { max-width: 1200px; margin: 0 auto; }
+  .heatmap-container { overflow-x: auto; }
+  .heatmap-table {
+    width: 100%; border-collapse: separate; border-spacing: 3px;
+    font-size: 13px;
+  }
+  .heatmap-table th {
+    padding: 10px 8px; text-align: center; color: var(--text-dim);
+    font-weight: 600; font-size: 12px;
+  }
+  .heatmap-table th.phase-col { writing-mode: horizontal-tb; min-width: 100px; }
+  .heatmap-table th.row-header {
+    text-align: right; padding-right: 14px; min-width: 120px;
+    color: var(--text);
+  }
+  .heatmap-cell {
+    text-align: center; padding: 16px 8px; border-radius: 6px;
+    cursor: pointer; transition: all 0.2s; position: relative;
+    font-weight: 700; font-size: 16px;
+  }
+  .heatmap-cell:hover {
+    transform: scale(1.08); box-shadow: 0 4px 12px var(--shadow);
+    z-index: 10;
+  }
+  .heatmap-cell .cell-count { display: block; font-size: 18px; }
+  .heatmap-cell .cell-label { display: block; font-size: 9px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
+  [data-theme="dark"] .heat-0, :root .heat-0 { background: rgba(255,255,255,0.03); color: var(--text-dim); }
+  [data-theme="light"] .heat-0 { background: rgba(0,0,0,0.03); color: var(--text-dim); }
+  .heat-1 { background: rgba(167,139,250,0.15); color: var(--accent); }
+  .heat-2 { background: rgba(167,139,250,0.25); color: var(--accent); }
+  .heat-3 { background: rgba(167,139,250,0.4); color: #fff; }
+  .heat-4 { background: rgba(167,139,250,0.55); color: #fff; }
+  .heat-5 { background: rgba(167,139,250,0.7); color: #fff; }
+  [data-theme="light"] .heat-3,
+  [data-theme="light"] .heat-4,
+  [data-theme="light"] .heat-5 { color: #fff; }
+
+  /* Heatmap tooltip */
+  .heatmap-tooltip {
+    position: fixed; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px; font-size: 12px;
+    color: var(--text); max-width: 300px; z-index: 1000;
+    pointer-events: none; display: none;
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+  .heatmap-tooltip .tt-title { font-weight: 700; color: var(--text-bright); margin-bottom: 6px; }
+  .heatmap-tooltip .tt-tools { color: var(--text-dim); }
+
+  /* ===== GAPS VIEW ===== */
+  #gaps-view { max-width: 1100px; margin: 0 auto; }
+  .cross-cut-section { margin-bottom: 32px; }
+  .cross-cut-section h2 {
+    font-size: 18px; color: var(--text-bright); margin-bottom: 16px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .cross-cut-card {
+    padding: 16px; border-radius: 8px; border: 1px solid;
+    margin-bottom: 12px;
+  }
+  .cross-cut-card.red { background: var(--red-bg); border-color: rgba(248,81,73,0.3); }
+  .cross-cut-card.yellow { background: var(--yellow-bg); border-color: rgba(210,153,34,0.3); }
+  .cross-cut-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .cross-cut-card.red .cross-cut-title { color: var(--red); }
+  .cross-cut-card.yellow .cross-cut-title { color: var(--yellow); }
+  .cross-cut-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 8px; }
+  .cross-cut-phases {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .phase-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 8px;
+    background: rgba(167,139,250,0.1); color: var(--accent);
+    border: 1px solid rgba(167,139,250,0.15);
+  }
+
+  /* Per-phase gap summary */
+  .phase-gap-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; cursor: pointer;
+  }
+  .phase-gap-header:hover .pgap-name { color: var(--accent); }
+  .pgap-icon { font-size: 22px; }
+  .pgap-name { font-size: 15px; font-weight: 600; color: var(--text-bright); transition: color 0.2s; }
+  .pgap-badges { display: flex; gap: 6px; margin-left: auto; }
+  .pgap-list { padding-left: 44px; margin-bottom: 16px; }
+
+  /* ===== FRAMEWORKS VIEW ===== */
+  #frameworks-view { max-width: 1100px; margin: 0 auto; }
+  .framework-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .framework-card:hover { border-color: var(--accent); }
+  .framework-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .framework-name {
+    font-size: 16px; font-weight: 700; color: var(--text-bright);
+  }
+  .framework-name a { color: var(--accent); text-decoration: none; }
+  .framework-name a:hover { text-decoration: underline; }
+  .framework-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
+  .framework-phases {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+
+  /* Stats banner */
+  .stats-banner {
+    display: flex; justify-content: center; gap: 32px;
+    padding: 16px 32px; flex-wrap: wrap;
+  }
+  .stat-block { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Theme Toggle */
+  .theme-toggle {
+    position: fixed; top: 16px; right: 20px; z-index: 200;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 6px 14px;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text); transition: all 0.3s;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .theme-toggle:hover { border-color: var(--accent); background: var(--bg-card-hover); }
+  .theme-toggle .toggle-icon { font-size: 16px; transition: transform 0.3s; }
+  .theme-toggle .toggle-label { font-weight: 500; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header h1 { font-size: 22px; }
+    .pipeline { flex-direction: column; align-items: center; }
+    .arrow { transform: rotate(90deg); flex: 0 0 20px; }
+    .phase-node { width: 90%; max-width: 320px; }
+    .tool-grid, .gap-grid { grid-template-columns: 1fr; }
+    .filter-bar input { width: 100%; }
+    .detail-mapping { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark theme">
+  <span class="toggle-icon" id="toggle-icon">🌙</span>
+  <span class="toggle-label" id="toggle-label">Dark</span>
+</button>
+
+<div class="header">
+  <h1>🤖 AI / ML Supply Chain Security Landscape</h1>
+  <p class="subtitle">
+    8-phase model mapping 55+ tools, standards, and frameworks from NIST, OWASP, MITRE, OpenSSF, MLCommons, CoSAI, and community projects.
+    Covers the full AI lifecycle from training data through production monitoring with gap analysis.
+  </p>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--openssf)"></span> OpenSSF</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--oasis)"></span> OASIS/CoSAI</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--owasp)"></span> OWASP</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--nist)"></span> NIST</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--mlcommons)"></span> MLCommons</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--mitre)"></span> MITRE</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--lfai)"></span> LF AI</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--community)"></span> Community</span>
+  </div>
+  <a class="nav-link" href="supply-chain-security.html">← Open Source Supply Chain Landscape</a>
+</div>
+
+<div class="stats-banner" id="stats-banner"></div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="pipeline">Pipeline Flow</button>
+  <button class="tab-btn" data-tab="heatmap">Coverage Heatmap</button>
+  <button class="tab-btn" data-tab="gaps">Gap Analysis</button>
+  <button class="tab-btn" data-tab="frameworks">Frameworks</button>
+</div>
+
+<div class="filter-bar">
+  <input type="text" id="search-input" placeholder="🔍 Search tools, controls, threats...">
+  <select id="foundation-filter">
+    <option value="all">All Organizations</option>
+    <option value="openssf">OpenSSF</option>
+    <option value="oasis">OASIS / CoSAI</option>
+    <option value="owasp">OWASP</option>
+    <option value="nist">NIST</option>
+    <option value="mlcommons">MLCommons</option>
+    <option value="mitre">MITRE</option>
+    <option value="lfai">LF AI & Data</option>
+    <option value="community">Community</option>
+  </select>
+  <select id="severity-filter">
+    <option value="all">All Severities</option>
+    <option value="red">🔴 Red (Critical)</option>
+    <option value="yellow">🟡 Yellow (Moderate)</option>
+  </select>
+</div>
+
+<!-- PIPELINE VIEW -->
+<div class="view active" id="pipeline-view">
+  <div class="pipeline" id="pipeline"></div>
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<!-- HEATMAP VIEW -->
+<div class="view" id="heatmap-view">
+  <div class="heatmap-container">
+    <table class="heatmap-table" id="heatmap-table"></table>
+  </div>
+</div>
+
+<!-- GAPS VIEW -->
+<div class="view" id="gaps-view">
+  <div id="gaps-content"></div>
+</div>
+
+<!-- FRAMEWORKS VIEW -->
+<div class="view" id="frameworks-view">
+  <div id="frameworks-content"></div>
+</div>
+
+<!-- Tooltip -->
+<div class="heatmap-tooltip" id="heatmap-tooltip"></div>
+
+<script>
+// ==================== DATA ====================
+const DATA_URL = "data/ai-supply-chain-data.json";
+
+let data = null;
+
+async function loadData() {
+  try {
+    const resp = await fetch(DATA_URL);
+    data = await resp.json();
+  } catch (e) {
+    console.warn("Fetch failed, using inline data:", e);
+    data = INLINE_DATA;
+  }
+  init();
+}
+
+// ==================== INITIALIZATION ====================
+function init() {
+  renderStats();
+  renderPipeline();
+  renderHeatmap();
+  renderGaps();
+  renderFrameworks();
+  setupTabs();
+  setupFilters();
+}
+
+// ==================== STATS BANNER ====================
+function renderStats() {
+  const totalTools = data.phases.reduce((s, p) => s + p.tools.length, 0);
+  const totalGaps = data.phases.reduce((s, p) => s + p.gaps.length, 0) + data.crossCuttingGaps.length;
+  const redGaps = data.phases.reduce((s, p) => s + p.gaps.filter(g => g.severity === "red").length, 0)
+    + data.crossCuttingGaps.filter(g => g.severity === "red").length;
+  const foundations = Object.keys(data.foundations).length;
+
+  document.getElementById("stats-banner").innerHTML = `
+    <div class="stat-block"><div class="stat-num">${totalTools}</div><div class="stat-label">Tools & Standards</div></div>
+    <div class="stat-block"><div class="stat-num">${data.phases.length}</div><div class="stat-label">Lifecycle Phases</div></div>
+    <div class="stat-block"><div class="stat-num">${foundations}</div><div class="stat-label">Organizations</div></div>
+    <div class="stat-block"><div class="stat-num">${totalGaps}</div><div class="stat-label">Identified Gaps</div></div>
+    <div class="stat-block"><div class="stat-num" style="color:var(--red)">${redGaps}</div><div class="stat-label">Critical Gaps</div></div>
+    <div class="stat-block"><div class="stat-num">${data.frameworks.length}</div><div class="stat-label">Frameworks</div></div>
+  `;
+}
+
+// ==================== PIPELINE VIEW ====================
+let selectedPhase = null;
+
+function renderPipeline() {
+  const container = document.getElementById("pipeline");
+  container.innerHTML = "";
+  const searchTerm = (document.getElementById("search-input")?.value || "").toLowerCase();
+  const foundationFilter = document.getElementById("foundation-filter")?.value || "all";
+
+  data.phases.forEach((phase, i) => {
+    if (i > 0) {
+      const arrow = document.createElement("div");
+      arrow.className = "arrow";
+      arrow.innerHTML = "▶";
+      container.appendChild(arrow);
+    }
+    const filteredTools = filterTools(phase.tools, searchTerm, foundationFilter);
+    const redGaps = phase.gaps.filter(g => g.severity === "red").length;
+    const yellowGaps = phase.gaps.filter(g => g.severity === "yellow").length;
+
+    const node = document.createElement("div");
+    node.className = "phase-node" + (selectedPhase === phase.id ? " selected" : "");
+    node.innerHTML = `
+      <div class="phase-icon">${phase.icon}</div>
+      <div class="phase-number">Phase ${phase.number}</div>
+      <div class="phase-name">${phase.shortName}</div>
+      <div class="phase-stats">
+        <span class="stat-badge stat-tools">${filteredTools.length} tools</span>
+        ${redGaps > 0 ? `<span class="stat-badge stat-gaps-r">${redGaps} 🔴</span>` : ""}
+        ${yellowGaps > 0 ? `<span class="stat-badge stat-gaps-y">${yellowGaps} 🟡</span>` : ""}
+      </div>
+    `;
+    node.onclick = () => selectPhase(phase.id);
+    container.appendChild(node);
+  });
+}
+
+function selectPhase(phaseId) {
+  selectedPhase = selectedPhase === phaseId ? null : phaseId;
+  renderPipeline();
+  renderDetailPanel();
+}
+
+function renderDetailPanel() {
+  const panel = document.getElementById("detail-panel");
+  if (!selectedPhase) {
+    panel.className = "detail-panel";
+    panel.innerHTML = "";
+    return;
+  }
+  const phase = data.phases.find(p => p.id === selectedPhase);
+  const searchTerm = (document.getElementById("search-input")?.value || "").toLowerCase();
+  const foundationFilter = document.getElementById("foundation-filter")?.value || "all";
+  const severityFilter = document.getElementById("severity-filter")?.value || "all";
+  const filteredTools = filterTools(phase.tools, searchTerm, foundationFilter);
+  const filteredGaps = filterGaps(phase.gaps, severityFilter, searchTerm);
+
+  panel.className = "detail-panel active";
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div class="phase-icon">${phase.icon}</div>
+      <div>
+        <h2>Phase ${phase.number}: ${phase.name}</h2>
+        <div class="detail-desc">${phase.description}</div>
+      </div>
+    </div>
+    <div class="detail-mapping">
+      <span class="mapping-badge">NIST AI RMF: ${phase.nistAiRmfMapping}</span>
+      <span class="mapping-badge">OWASP: ${phase.owaspMapping}</span>
+      <span class="mapping-badge">MITRE ATLAS: ${phase.mitreAtlasMapping}</span>
+    </div>
+
+    <div class="detail-section">
+      <h3>⚠️ Threats <span class="count-badge">${phase.threats.length}</span></h3>
+      <div class="threat-list">
+        ${phase.threats.map(t => `<div class="threat-item">${t}</div>`).join("")}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>🛡️ Controls <span class="count-badge">${phase.controls.length}</span></h3>
+      <div class="control-list">
+        ${phase.controls.map(c => `<div class="control-item">${c}</div>`).join("")}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>🔧 Tools & Standards <span class="count-badge">${filteredTools.length}</span></h3>
+      <div class="tool-grid">
+        ${filteredTools.map(t => renderToolCard(t)).join("")}
+      </div>
+      ${filteredTools.length === 0 ? '<div style="color:var(--text-dim);font-size:13px;padding:12px;">No tools match current filters.</div>' : ""}
+    </div>
+
+    <div class="detail-section">
+      <h3>🚨 Gaps <span class="count-badge">${filteredGaps.length}</span></h3>
+      <div class="gap-grid">
+        ${filteredGaps.map(g => `
+          <div class="gap-card ${g.severity}">
+            <div class="gap-card-title">
+              <span class="gap-severity-indicator ${g.severity}"></span>
+              ${g.title}
+            </div>
+            <div class="gap-card-desc">${g.description}</div>
+          </div>
+        `).join("")}
+      </div>
+      ${filteredGaps.length === 0 ? '<div style="color:var(--text-dim);font-size:13px;padding:12px;">No gaps match current filters.</div>' : ""}
+    </div>
+  `;
+}
+
+function renderToolCard(tool) {
+  const fnd = data.foundations[tool.foundation];
+  return `
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <div class="tool-card-title"><a href="${escapeHtml(tool.url)}" target="_blank" rel="noopener">${escapeHtml(tool.name)}</a></div>
+        <span class="foundation-badge badge-${tool.foundation}">${fnd ? fnd.abbr : tool.foundation}</span>
+      </div>
+      <div class="tool-card-desc">${escapeHtml(tool.description)}</div>
+      <div class="tool-card-meta">
+        <span class="maturity-badge">${escapeHtml(tool.maturity)}</span>
+        ${tool.controlsCovered.map(c => `<span class="controls-covered" title="${escapeHtml(c)}">${truncate(c, 35)}</span>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
+// ==================== HEATMAP VIEW ====================
+function renderHeatmap() {
+  const table = document.getElementById("heatmap-table");
+  const foundationKeys = Object.keys(data.foundations);
+  const searchTerm = (document.getElementById("search-input")?.value || "").toLowerCase();
+  const foundationFilter = document.getElementById("foundation-filter")?.value || "all";
+
+  const matrix = {};
+  data.phases.forEach(phase => {
+    matrix[phase.id] = {};
+    foundationKeys.forEach(fk => {
+      const tools = phase.tools.filter(t => t.foundation === fk);
+      const filtered = filterTools(tools, searchTerm, foundationFilter === "all" ? "all" : foundationFilter);
+      matrix[phase.id][fk] = filtered;
+    });
+  });
+
+  let html = "<thead><tr><th></th>";
+  data.phases.forEach(p => {
+    html += `<th class="phase-col">${p.icon}<br>${p.shortName}</th>`;
+  });
+  html += "</tr></thead><tbody>";
+
+  foundationKeys.forEach(fk => {
+    if (foundationFilter !== "all" && fk !== foundationFilter) return;
+    const fnd = data.foundations[fk];
+    html += `<tr><th class="row-header"><span class="foundation-badge badge-${fk}">${fnd.abbr}</span></th>`;
+    data.phases.forEach(p => {
+      const tools = matrix[p.id][fk];
+      const count = tools.length;
+      const heatClass = count === 0 ? "heat-0" : count === 1 ? "heat-1" : count === 2 ? "heat-2" : count === 3 ? "heat-3" : count <= 4 ? "heat-4" : "heat-5";
+      html += `<td class="heatmap-cell ${heatClass}"
+        data-phase="${p.id}" data-foundation="${fk}"
+        onmouseenter="showHeatTooltip(event,'${p.id}','${fk}')"
+        onmouseleave="hideHeatTooltip()">
+        <span class="cell-count">${count}</span>
+        <span class="cell-label">${count === 1 ? 'tool' : 'tools'}</span>
+      </td>`;
+    });
+    html += "</tr>";
+  });
+
+  // Gaps row
+  html += `<tr><th class="row-header" style="color:var(--red);font-weight:700">🚨 Gaps</th>`;
+  data.phases.forEach(p => {
+    const red = p.gaps.filter(g => g.severity === "red").length;
+    const yellow = p.gaps.filter(g => g.severity === "yellow").length;
+    const cellColor = red > 0 ? "background:var(--red-bg);color:var(--red)" : yellow > 0 ? "background:var(--yellow-bg);color:var(--yellow)" : "background:var(--green-bg);color:var(--green)";
+    html += `<td class="heatmap-cell" style="${cellColor}"
+      data-phase="${p.id}" data-type="gaps"
+      onmouseenter="showGapTooltip(event,'${p.id}')"
+      onmouseleave="hideHeatTooltip()">
+      <span class="cell-count">${red > 0 ? "🔴 " + red : ""}${red > 0 && yellow > 0 ? " " : ""}${yellow > 0 ? "🟡 " + yellow : ""}${red === 0 && yellow === 0 ? "✅" : ""}</span>
+    </td>`;
+  });
+  html += "</tr></tbody>";
+  table.innerHTML = html;
+}
+
+function showHeatTooltip(event, phaseId, foundationKey) {
+  const phase = data.phases.find(p => p.id === phaseId);
+  const fnd = data.foundations[foundationKey];
+  const tools = phase.tools.filter(t => t.foundation === foundationKey);
+  if (tools.length === 0) return;
+
+  const tooltip = document.getElementById("heatmap-tooltip");
+  tooltip.innerHTML = `
+    <div class="tt-title">${fnd.abbr} → ${phase.shortName}</div>
+    <div class="tt-tools">${tools.map(t => `• ${t.name} <em>(${t.maturity})</em>`).join("<br>")}</div>
+  `;
+  tooltip.style.display = "block";
+  positionTooltip(tooltip, event);
+}
+
+function showGapTooltip(event, phaseId) {
+  const phase = data.phases.find(p => p.id === phaseId);
+  const tooltip = document.getElementById("heatmap-tooltip");
+  tooltip.innerHTML = `
+    <div class="tt-title">${phase.shortName} — Gaps</div>
+    <div class="tt-tools">${phase.gaps.map(g => `<span class="gap-severity-indicator ${g.severity}"></span> ${g.title}`).join("<br>")}</div>
+  `;
+  tooltip.style.display = "block";
+  positionTooltip(tooltip, event);
+}
+
+function positionTooltip(tooltip, event) {
+  let x = event.clientX + 12;
+  let y = event.clientY + 12;
+  if (x + 310 > window.innerWidth) x = event.clientX - 310;
+  if (y + 200 > window.innerHeight) y = event.clientY - 200;
+  tooltip.style.left = x + "px";
+  tooltip.style.top = y + "px";
+}
+
+function hideHeatTooltip() {
+  document.getElementById("heatmap-tooltip").style.display = "none";
+}
+
+// ==================== GAPS VIEW ====================
+function renderGaps() {
+  const container = document.getElementById("gaps-content");
+  const severityFilter = document.getElementById("severity-filter")?.value || "all";
+  const searchTerm = (document.getElementById("search-input")?.value || "").toLowerCase();
+
+  let html = '<div class="cross-cut-section"><h2>🌐 Cross-Cutting Gaps (Multi-Phase)</h2>';
+  const crossFiltered = data.crossCuttingGaps.filter(g => {
+    if (severityFilter !== "all" && g.severity !== severityFilter) return false;
+    if (searchTerm && !g.title.toLowerCase().includes(searchTerm) && !g.description.toLowerCase().includes(searchTerm)) return false;
+    return true;
+  });
+  crossFiltered.forEach(g => {
+    html += `
+      <div class="cross-cut-card ${g.severity}">
+        <div class="cross-cut-title"><span class="gap-severity-indicator ${g.severity}"></span> ${g.title}</div>
+        <div class="cross-cut-desc">${g.description}</div>
+        <div class="cross-cut-phases">
+          ${g.phases.map(pid => {
+            const p = data.phases.find(pp => pp.id === pid);
+            return `<span class="phase-tag">${p ? p.icon + " " + p.shortName : pid}</span>`;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  });
+  if (crossFiltered.length === 0) html += '<p style="color:var(--text-dim);padding:12px;">No cross-cutting gaps match filters.</p>';
+  html += "</div>";
+
+  html += '<div class="cross-cut-section"><h2>📋 Per-Phase Gap Breakdown</h2>';
+  data.phases.forEach(phase => {
+    const gaps = filterGaps(phase.gaps, severityFilter, searchTerm);
+    const red = gaps.filter(g => g.severity === "red").length;
+    const yellow = gaps.filter(g => g.severity === "yellow").length;
+    html += `
+      <div class="phase-gap-header">
+        <span class="pgap-icon">${phase.icon}</span>
+        <span class="pgap-name">${phase.name}</span>
+        <span class="pgap-badges">
+          ${red > 0 ? `<span class="stat-badge stat-gaps-r">${red} critical</span>` : ""}
+          ${yellow > 0 ? `<span class="stat-badge stat-gaps-y">${yellow} moderate</span>` : ""}
+          ${red === 0 && yellow === 0 ? `<span class="stat-badge stat-tools">✅ No gaps</span>` : ""}
+        </span>
+      </div>
+      <div class="pgap-list">
+        <div class="gap-grid">
+          ${gaps.map(g => `
+            <div class="gap-card ${g.severity}">
+              <div class="gap-card-title"><span class="gap-severity-indicator ${g.severity}"></span> ${g.title}</div>
+              <div class="gap-card-desc">${g.description}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  });
+  html += "</div>";
+
+  container.innerHTML = html;
+}
+
+// ==================== FRAMEWORKS VIEW ====================
+function renderFrameworks() {
+  const container = document.getElementById("frameworks-content");
+  let html = "<h2 style='font-size:18px;color:var(--text-bright);margin-bottom:16px;'>AI/ML Security Frameworks & Standards</h2>";
+  data.frameworks.forEach(fw => {
+    const fnd = data.foundations[fw.foundation];
+    html += `
+      <div class="framework-card">
+        <div class="framework-header">
+          <div class="framework-name"><a href="${escapeHtml(fw.url)}" target="_blank" rel="noopener">${escapeHtml(fw.name)}</a></div>
+          <span class="foundation-badge badge-${fw.foundation}">${fnd ? fnd.abbr : fw.foundation}</span>
+        </div>
+        <div class="framework-desc">${escapeHtml(fw.description)}</div>
+        <div class="framework-phases">
+          ${fw.phases.map(pid => {
+            const p = data.phases.find(pp => pp.id === pid);
+            return `<span class="phase-tag">${p ? p.icon + " " + p.shortName : pid}</span>`;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+// ==================== TABS ====================
+function setupTabs() {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab + "-view").classList.add("active");
+    };
+  });
+}
+
+// ==================== FILTERS ====================
+function setupFilters() {
+  const refresh = () => {
+    renderPipeline();
+    renderDetailPanel();
+    renderHeatmap();
+    renderGaps();
+  };
+  document.getElementById("search-input").addEventListener("input", debounce(refresh, 250));
+  document.getElementById("foundation-filter").addEventListener("change", refresh);
+  document.getElementById("severity-filter").addEventListener("change", refresh);
+}
+
+// ==================== HELPERS ====================
+function filterTools(tools, searchTerm, foundationFilter) {
+  return tools.filter(t => {
+    if (foundationFilter !== "all" && t.foundation !== foundationFilter) return false;
+    if (searchTerm) {
+      const haystack = (t.name + " " + t.description + " " + t.controlsCovered.join(" ")).toLowerCase();
+      if (!haystack.includes(searchTerm)) return false;
+    }
+    return true;
+  });
+}
+
+function filterGaps(gaps, severityFilter, searchTerm) {
+  return gaps.filter(g => {
+    if (severityFilter !== "all" && g.severity !== severityFilter) return false;
+    if (searchTerm) {
+      const haystack = (g.title + " " + g.description).toLowerCase();
+      if (!haystack.includes(searchTerm)) return false;
+    }
+    return true;
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+function truncate(str, len) {
+  return str.length > len ? str.slice(0, len) + "…" : str;
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+// ==================== INLINE DATA FALLBACK ====================
+const INLINE_DATA = {"metadata":{"title":"AI / ML Supply Chain Security Landscape","version":"1.0.0","lastUpdated":"2026-04-01","description":"Comprehensive mapping of AI/ML supply chain security tools, frameworks, and standards across the full model lifecycle — from training data to production monitoring.","unifiedModel":"Maps NIST AI RMF, OWASP ML/LLM Top 10, MITRE ATLAS, and emerging AI governance standards into 8 AI lifecycle phases."},"foundations":{"openssf":{"name":"Open Source Security Foundation (OpenSSF)","url":"https://openssf.org","parent":"Linux Foundation","color":"#4B8BBE","abbr":"OpenSSF"},"oasis":{"name":"OASIS Open / CoSAI","url":"https://www.oasis-open.org","parent":null,"color":"#E97627","abbr":"OASIS"},"owasp":{"name":"OWASP Foundation","url":"https://owasp.org","parent":null,"color":"#404040","abbr":"OWASP"},"nist":{"name":"National Institute of Standards and Technology","url":"https://www.nist.gov","parent":"US Department of Commerce","color":"#1B5E20","abbr":"NIST"},"mlcommons":{"name":"MLCommons","url":"https://mlcommons.org","parent":null,"color":"#7B1FA2","abbr":"MLCommons"},"mitre":{"name":"MITRE Corporation","url":"https://www.mitre.org","parent":null,"color":"#C62828","abbr":"MITRE"},"lfai":{"name":"LF AI & Data Foundation","url":"https://lfaidata.foundation","parent":"Linux Foundation","color":"#009639","abbr":"LF AI"},"community":{"name":"Community / Independent Projects","url":null,"parent":null,"color":"#888888","abbr":"Community"}},"phases":[{"id":"data","number":1,"name":"Training Data Sourcing & Curation","shortName":"Data","icon":"🗂️","description":"Sourcing, curating, validating, and documenting training datasets. Ensuring data quality, detecting poisoning, managing provenance, and handling PII/copyright compliance.","nistAiRmfMapping":"MAP 1.5, MAP 2.3 — Data provenance and quality assessment","owaspMapping":"ML04 — Data Poisoning, ML01 — Input Manipulation","mitreAtlasMapping":"AML.T0020 — Poison Training Data, AML.T0019 — Publish Poisoned Dataset","threats":["Training data poisoning (backdoor injection)","Biased or unrepresentative training data","PII / sensitive data in training sets","Copyright / license violations in scraped data","Mislabeled or corrupted data samples","Web-scraped adversarial content injection"],"controls":["Data provenance tracking and lineage","Automated data quality validation","PII detection and scrubbing pipelines","Bias auditing and fairness testing of datasets","Dataset licensing and compliance checks","Data versioning and reproducibility"],"tools":[{"name":"Croissant (MLCommons)","foundation":"mlcommons","url":"https://github.com/mlcommons/croissant","description":"Metadata format for ML datasets — describes dataset structure, provenance, licensing, and responsible AI properties in a machine-readable format.","maturity":"active","controlsCovered":["Data provenance tracking and lineage","Dataset licensing and compliance checks"]},{"name":"Data Provenance Initiative","foundation":"community","url":"https://www.dataprovenance.org","description":"Large-scale audit of training datasets used in AI — maps provenance, licensing, and composition of popular datasets.","maturity":"active","controlsCovered":["Data provenance tracking and lineage","Dataset licensing and compliance checks"]},{"name":"DVC (Data Version Control)","foundation":"community","url":"https://dvc.org","description":"Git-based version control for datasets and ML experiments — tracks data lineage, enables reproducible pipelines, and manages large files.","maturity":"production","controlsCovered":["Data versioning and reproducibility","Data provenance tracking and lineage"]},{"name":"Great Expectations","foundation":"community","url":"https://greatexpectations.io","description":"Data validation framework — defines expectations for data quality, schema conformance, and statistical properties with automated testing.","maturity":"production","controlsCovered":["Automated data quality validation"]},{"name":"Presidio (Microsoft)","foundation":"community","url":"https://github.com/microsoft/presidio","description":"SDK for data protection and PII anonymization — detects and de-identifies PII in text and images for safe training data preparation.","maturity":"production","controlsCovered":["PII detection and scrubbing pipelines"]},{"name":"Cleanlab","foundation":"community","url":"https://github.com/cleanlab/cleanlab","description":"Data-centric AI tool for finding and fixing label errors, outliers, and data quality issues in ML datasets automatically.","maturity":"production","controlsCovered":["Automated data quality validation","Bias auditing and fairness testing of datasets"]},{"name":"AI Fairness 360 (AIF360)","foundation":"lfai","url":"https://aif360.res.ibm.com","description":"IBM toolkit for detecting and mitigating bias in datasets and ML models — provides 70+ fairness metrics and 10+ bias mitigation algorithms.","maturity":"active","controlsCovered":["Bias auditing and fairness testing of datasets"]},{"name":"Know Your Data (Google)","foundation":"community","url":"https://knowyourdata.withgoogle.com","description":"Tool for exploring and understanding ML datasets — surfaces potential biases, sensitive content, and data quality issues before training.","maturity":"active","controlsCovered":["Bias auditing and fairness testing of datasets","Automated data quality validation"]}],"gaps":[{"title":"Automated data poisoning detection","severity":"red","description":"No production-ready tool reliably detects sophisticated data poisoning or backdoor injection in large-scale training datasets."},{"title":"Training data copyright verification","severity":"red","description":"No automated system can determine copyright status of web-scraped or crowd-sourced training data at scale. Legal frameworks are still evolving."},{"title":"Cross-dataset provenance standard","severity":"yellow","description":"Croissant is emerging but adoption is early. No universal standard links a model's performance to specific training data subsets."}]},{"id":"training","number":2,"name":"Model Development & Training","shortName":"Training","icon":"⚙️","description":"Securing the model training pipeline — reproducible experiments, isolated compute environments, tamper-resistant training processes, and training artifact integrity.","nistAiRmfMapping":"MAP 3.4 — Secure development practices for AI","owaspMapping":"ML06 — AI Supply Chain Attacks (training phase)","mitreAtlasMapping":"AML.T0018 — Backdoor ML Model, AML.T0035 — Develop Capabilities","threats":["Training pipeline compromise / code injection","Malicious code in training scripts or notebooks","Backdoor injection during fine-tuning","Gradient leaking / training data extraction","Compromised training infrastructure (GPU clusters)","Hyperparameter manipulation to degrade models"],"controls":["Reproducible training pipelines (code + data + environment)","Training environment isolation and access control","Training checkpoint signing and verification","Experiment tracking and audit logging","Compute integrity verification","Dependency pinning for training frameworks"],"tools":[{"name":"MLflow","foundation":"lfai","url":"https://mlflow.org","description":"Open source platform for ML lifecycle management — experiment tracking, reproducible runs, model packaging, and deployment. LF AI & Data project.","maturity":"graduated","controlsCovered":["Experiment tracking and audit logging","Reproducible training pipelines (code + data + environment)"]},{"name":"Kubeflow","foundation":"community","url":"https://www.kubeflow.org","description":"Kubernetes-native ML workflow platform — provides pipeline orchestration, experiment tracking, and scalable training with infrastructure isolation.","maturity":"production","controlsCovered":["Training environment isolation and access control","Reproducible training pipelines (code + data + environment)"]},{"name":"Determined AI","foundation":"community","url":"https://github.com/determined-ai/determined","description":"Deep learning training platform with built-in experiment tracking, distributed training, hyperparameter search, and reproducibility features.","maturity":"production","controlsCovered":["Reproducible training pipelines (code + data + environment)","Experiment tracking and audit logging"]},{"name":"DVC (pipeline mode)","foundation":"community","url":"https://dvc.org","description":"ML pipeline versioning and reproducibility — tracks code, data, parameters, and metrics together for fully reproducible training runs.","maturity":"production","controlsCovered":["Reproducible training pipelines (code + data + environment)","Dependency pinning for training frameworks"]},{"name":"SLSA for ML (proposal)","foundation":"openssf","url":"https://slsa.dev","description":"Proposed extension of SLSA framework to ML training pipelines — applying build provenance concepts to model training processes.","maturity":"experimental","controlsCovered":["Training checkpoint signing and verification","Compute integrity verification"]},{"name":"Metaflow","foundation":"community","url":"https://metaflow.org","description":"Human-centric ML infrastructure framework (Netflix) — manages data, compute, and versioning for reproducible ML workflows.","maturity":"production","controlsCovered":["Reproducible training pipelines (code + data + environment)","Training environment isolation and access control"]}],"gaps":[{"title":"Training pipeline tamper detection","severity":"red","description":"No equivalent of SLSA provenance exists for ML training. Cannot cryptographically verify that a model was trained with specific code, data, and parameters."},{"title":"Fine-tuning chain of custody","severity":"red","description":"When models are fine-tuned across organizations, no standard tracks the full lineage from base model through each fine-tuning step."},{"title":"GPU/TPU compute integrity","severity":"yellow","description":"No mechanism to verify that training hardware has not been compromised. Side-channel attacks on GPU clusters are an emerging concern."}]},{"id":"packaging","number":3,"name":"Model Packaging & Signing","shortName":"Packaging","icon":"📦","description":"Securely packaging model artifacts, signing model weights, using safe serialization formats, and generating provenance attestations for AI/ML models.","nistAiRmfMapping":"GOVERN 1.7 — AI artifact integrity and traceability","owaspMapping":"ML06 — AI Supply Chain Attacks (packaging phase)","mitreAtlasMapping":"AML.T0010 — ML Supply Chain Compromise, AML.T0017 — Develop Adversarial ML Artifacts","threats":["Pickle deserialization attacks (arbitrary code execution)","Model file tampering after training","Unsigned model weights distributed without verification","Malicious code embedded in model files","Lack of provenance for fine-tuned or merged models","Model weight extraction and unauthorized redistribution"],"controls":["Safe serialization formats (avoid pickle)","Cryptographic model signing (Sigstore)","Model hash verification on download","Provenance attestation for models","Model file format validation and scanning","Keyless signing with OIDC identity binding"],"tools":[{"name":"Model Signing (Sigstore)","foundation":"openssf","url":"https://github.com/sigstore/model-transparency","description":"Applies Sigstore-based signing to ML models — generates cryptographic signatures and provenance attestations for model artifacts.","maturity":"experimental","controlsCovered":["Cryptographic model signing (Sigstore)","Provenance attestation for models","Keyless signing with OIDC identity binding"]},{"name":"Safetensors (Hugging Face)","foundation":"community","url":"https://github.com/huggingface/safetensors","description":"Safe and fast file format for storing tensors — eliminates arbitrary code execution risks from pickle-based formats (PyTorch, TensorFlow).","maturity":"production","controlsCovered":["Safe serialization formats (avoid pickle)","Model file format validation and scanning"]},{"name":"ModelScan (Protect AI)","foundation":"community","url":"https://github.com/protectai/modelscan","description":"Scans ML model files for unsafe operations — detects malicious code in pickle, H5, SavedModel, and other serialization formats.","maturity":"active","controlsCovered":["Model file format validation and scanning","Safe serialization formats (avoid pickle)"]},{"name":"ONNX Runtime","foundation":"lfai","url":"https://onnxruntime.ai","description":"Cross-platform inference accelerator with safe model format (ONNX protobuf) — avoids unsafe deserialization while enabling model portability.","maturity":"production","controlsCovered":["Safe serialization formats (avoid pickle)"]},{"name":"Cosign (for model OCI artifacts)","foundation":"openssf","url":"https://github.com/sigstore/cosign","description":"Extended to sign OCI-packaged model artifacts — enables keyless signing and verification of models stored in container registries.","maturity":"graduated","controlsCovered":["Cryptographic model signing (Sigstore)","Keyless signing with OIDC identity binding"]},{"name":"fickling","foundation":"community","url":"https://github.com/trailofbits/fickling","description":"Python pickle decompiler and static analyzer — detects malicious code hidden in serialized Python objects used in ML model files.","maturity":"active","controlsCovered":["Model file format validation and scanning"]}],"gaps":[{"title":"Model signing adoption","severity":"red","description":"Sigstore Model Signing is experimental. No model hub (Hugging Face, PyTorch Hub) requires signed models by default. Adoption is near zero."},{"title":"Fine-tuned model provenance","severity":"red","description":"No standard for attesting the chain of custody through fine-tuning: base model → dataset → parameters → resulting model."},{"title":"Safe format migration","severity":"yellow","description":"Despite safetensors availability, many popular models still distribute in pickle format. Migration tooling exists but ecosystem-wide adoption is slow."}]},{"id":"registry","number":4,"name":"Model Registry & Distribution","shortName":"Registry","icon":"🏪","description":"Hosting, sharing, and distributing AI/ML models through registries. Ensuring access controls, integrity verification, namespace protection, and secure model delivery.","nistAiRmfMapping":"GOVERN 1.6 — Mechanisms for secure AI artifact distribution","owaspMapping":"ML06 — AI Supply Chain Attacks (distribution phase)","mitreAtlasMapping":"AML.T0010.002 — ML Supply Chain Compromise: Model Repository","threats":["Model registry account takeover","Model substitution / swapping attacks","Typosquatting on model names","Unauthorized model access and exfiltration","Malicious model uploads to public hubs","Model namespace hijacking"],"controls":["Model registry access controls and MFA","Model integrity verification on download","Namespace and model name protection","Model versioning with immutable releases","Secure distribution channels (checksums + signatures)","Model access audit logging"],"tools":[{"name":"Hugging Face Hub","foundation":"community","url":"https://huggingface.co","description":"Largest open model hub — hosts 500K+ models with versioning, access controls, model cards, gated models, and malware scanning.","maturity":"production","controlsCovered":["Model registry access controls and MFA","Model versioning with immutable releases","Model access audit logging"]},{"name":"MLflow Model Registry","foundation":"lfai","url":"https://mlflow.org/docs/latest/model-registry.html","description":"Centralized model store for managing model lifecycle — versioning, staging, annotations, and deployment tracking.","maturity":"graduated","controlsCovered":["Model versioning with immutable releases","Model access audit logging"]},{"name":"ORAS (OCI Registry As Storage)","foundation":"community","url":"https://oras.land","description":"Enables storing any artifact (including ML models) in OCI-compliant registries — leverages container registry security infrastructure for model distribution.","maturity":"production","controlsCovered":["Secure distribution channels (checksums + signatures)","Model integrity verification on download"]},{"name":"Harbor (for ML artifacts)","foundation":"community","url":"https://goharbor.io","description":"Enterprise container registry extended to host OCI-packaged ML models with vulnerability scanning, content trust, and replication.","maturity":"graduated","controlsCovered":["Model registry access controls and MFA","Model integrity verification on download","Secure distribution channels (checksums + signatures)"]},{"name":"ModelDB","foundation":"community","url":"https://github.com/VertaAI/modeldb","description":"Open source model management system — tracks model versions, experiments, and metadata for reproducibility and governance.","maturity":"active","controlsCovered":["Model versioning with immutable releases","Model access audit logging"]}],"gaps":[{"title":"Model hub security standards","severity":"red","description":"No industry standard for model hub security requirements. Hugging Face, PyTorch Hub, and others have ad-hoc security with no common baseline."},{"title":"Model typosquatting prevention","severity":"yellow","description":"No tooling exists to detect and prevent model name squatting or typosquatting on public model hubs. Attackers can publish malicious models with similar names."},{"title":"Cross-hub model verification","severity":"yellow","description":"Models are re-hosted across multiple hubs with no standard for verifying that a copy matches the original or tracking its distribution chain."}]},{"id":"evaluation","number":5,"name":"Model Evaluation & Red Teaming","shortName":"Evaluation","icon":"🔬","description":"Adversarial testing, safety evaluation, bias auditing, and red teaming of AI/ML models before deployment. Assessing robustness, fairness, and security properties.","nistAiRmfMapping":"MEASURE 2.6, 2.7 — AI system testing and evaluation, adversarial testing","owaspMapping":"LLM01 — Prompt Injection, LLM02 — Insecure Output Handling, LLM09 — Overreliance","mitreAtlasMapping":"AML.T0043 — Craft Adversarial Data, AML.T0015 — Evade ML Model, AML.T0040 — ML Model Inference API Access","threats":["Adversarial inputs causing misclassification","Prompt injection attacks on LLMs","Jailbreaking / safety bypass techniques","Bias and fairness failures in production","Model inversion / membership inference attacks","Hallucination and factual inaccuracy"],"controls":["Adversarial robustness testing","Prompt injection detection and testing","Bias and fairness evaluation benchmarks","Red teaming exercises (manual + automated)","Safety evaluation benchmarks","Privacy leakage testing (membership inference)"],"tools":[{"name":"PyRIT (Microsoft)","foundation":"community","url":"https://github.com/Azure/PyRIT","description":"Python Risk Identification Toolkit — automated red teaming framework for generative AI, testing prompt injection, jailbreaks, and harmful content generation.","maturity":"active","controlsCovered":["Red teaming exercises (manual + automated)","Prompt injection detection and testing"]},{"name":"Garak","foundation":"community","url":"https://github.com/NVIDIA/garak","description":"LLM vulnerability scanner — probes language models for hallucination, data leakage, prompt injection, toxicity, and other failure modes.","maturity":"active","controlsCovered":["Prompt injection detection and testing","Adversarial robustness testing","Red teaming exercises (manual + automated)"]},{"name":"Adversarial Robustness Toolbox (ART)","foundation":"lfai","url":"https://github.com/Trusted-AI/adversarial-robustness-toolbox","description":"IBM library for ML security — provides attacks, defenses, and robustness metrics for evasion, poisoning, extraction, and inference threats.","maturity":"active","controlsCovered":["Adversarial robustness testing","Privacy leakage testing (membership inference)"]},{"name":"HELM (Stanford CRFM)","foundation":"community","url":"https://crfm.stanford.edu/helm","description":"Holistic Evaluation of Language Models — comprehensive benchmark suite measuring accuracy, calibration, robustness, fairness, bias, toxicity, and efficiency.","maturity":"active","controlsCovered":["Safety evaluation benchmarks","Bias and fairness evaluation benchmarks"]},{"name":"Inspect AI (UK AISI)","foundation":"community","url":"https://github.com/UKGovernmentBEIS/inspect_ai","description":"Framework for large language model evaluations by UK AI Safety Institute — supports custom evaluations with built-in safety benchmarks.","maturity":"active","controlsCovered":["Safety evaluation benchmarks","Red teaming exercises (manual + automated)"]},{"name":"DeepEval","foundation":"community","url":"https://github.com/confident-ai/deepeval","description":"Open source LLM evaluation framework — unit testing for LLMs with metrics for hallucination, toxicity, bias, answer relevancy, and faithfulness.","maturity":"active","controlsCovered":["Safety evaluation benchmarks","Bias and fairness evaluation benchmarks"]},{"name":"MLCommons AI Safety Benchmarks","foundation":"mlcommons","url":"https://mlcommons.org/ai-safety/","description":"Standardized safety evaluation benchmarks for AI systems — consortium-led effort to create widely adopted safety testing standards.","maturity":"active","controlsCovered":["Safety evaluation benchmarks"]},{"name":"Counterfit (Microsoft)","foundation":"community","url":"https://github.com/Azure/counterfit","description":"Command-line tool for assessing ML model security — automates adversarial attacks against ML models using ART and TextAttack backends.","maturity":"active","controlsCovered":["Adversarial robustness testing","Red teaming exercises (manual + automated)"]}],"gaps":[{"title":"Standardized AI safety benchmarks","severity":"yellow","description":"Multiple competing benchmark suites exist but no universal standard for 'AI safety certification.' MLCommons is working on this but adoption is early."},{"title":"Multimodal model evaluation","severity":"red","description":"Most red teaming tools focus on text LLMs. Evaluation of multimodal models (vision, audio, video) for adversarial robustness is severely underserved."},{"title":"Automated red teaming maturity","severity":"yellow","description":"PyRIT and Garak are promising but early. Automated red teaming cannot yet match the creativity and coverage of human red teams for novel attack vectors."}]},{"id":"aibom","number":6,"name":"AI BOM & Transparency","shortName":"AI BOM","icon":"📋","description":"Generating and managing AI Bills of Materials — model cards, data cards, ML-BOMs — to ensure transparency, reproducibility, and regulatory compliance.","nistAiRmfMapping":"GOVERN 4.1 — Organizational AI transparency practices, MAP 5.1","owaspMapping":"ML07 — Transfer Learning Attack (documentation gap)","mitreAtlasMapping":"AML.T0010 — ML Supply Chain Compromise (transparency gap)","threats":["Incomplete or missing model documentation","Unknown training data composition","Opaque model lineage and fine-tuning history","Missing license and usage restriction information","No reproducibility metadata","Lack of intended use and limitation documentation"],"controls":["Model card generation and maintenance","AI/ML BOM creation (CycloneDX ML-BOM or SPDX AI)","Dataset documentation (Datasheets for Datasets)","Training data provenance records","License and usage restriction documentation","Environmental impact reporting"],"tools":[{"name":"CycloneDX ML-BOM","foundation":"owasp","url":"https://cyclonedx.org/capabilities/mlbom/","description":"Extension of CycloneDX SBOM standard for ML — captures model architecture, datasets, training environment, hyperparameters, and performance metrics.","maturity":"draft","controlsCovered":["AI/ML BOM creation (CycloneDX ML-BOM or SPDX AI)","Training data provenance records"]},{"name":"SPDX AI Profile","foundation":"lfai","url":"https://spdx.dev/use/ai/","description":"SPDX extension for AI/ML transparency — adds fields for model type, training data, metrics, known limitations, and safety information.","maturity":"draft","controlsCovered":["AI/ML BOM creation (CycloneDX ML-BOM or SPDX AI)","License and usage restriction documentation"]},{"name":"Model Cards (Google)","foundation":"community","url":"https://modelcards.withgoogle.com","description":"Framework for documenting ML model performance, limitations, intended use, and ethical considerations — originated at Google Research.","maturity":"active","controlsCovered":["Model card generation and maintenance","License and usage restriction documentation"]},{"name":"Hugging Face Model Cards","foundation":"community","url":"https://huggingface.co/docs/hub/model-cards","description":"Standardized model documentation on Hugging Face Hub — includes metadata YAML, model description, training details, and evaluation results.","maturity":"production","controlsCovered":["Model card generation and maintenance","Training data provenance records"]},{"name":"Datasheets for Datasets","foundation":"community","url":"https://arxiv.org/abs/1803.09010","description":"Documentation framework for datasets (Gebru et al.) — standardizes how dataset creators communicate composition, collection, and intended uses.","maturity":"active","controlsCovered":["Dataset documentation (Datasheets for Datasets)","Training data provenance records"]},{"name":"CoSAI Model Card Specification","foundation":"oasis","url":"https://www.coalitionforsecureai.org","description":"Coalition for Secure AI working on standardized security-focused model cards — includes adversarial testing results, known vulnerabilities, and supply chain metadata.","maturity":"forming","controlsCovered":["Model card generation and maintenance","AI/ML BOM creation (CycloneDX ML-BOM or SPDX AI)"]},{"name":"CodeCarbon","foundation":"community","url":"https://codecarbon.io","description":"Tracks carbon emissions from computing — measures energy consumption and CO2 impact of model training for environmental impact reporting.","maturity":"active","controlsCovered":["Environmental impact reporting"]}],"gaps":[{"title":"ML-BOM tooling","severity":"red","description":"CycloneDX ML-BOM and SPDX AI Profile exist in draft but automated tooling for generating ML-BOMs from training pipelines is virtually non-existent."},{"title":"Model card enforcement","severity":"yellow","description":"Model cards are voluntary documentation. No model hub or registry enforces minimum documentation standards or validates model card completeness."},{"title":"Training data transparency","severity":"red","description":"Most foundation model providers do not disclose full training data composition. No regulatory mechanism reliably compels transparency."}]},{"id":"deployment","number":7,"name":"Deployment & Runtime Security","shortName":"Deployment","icon":"🚀","description":"Securing AI model serving infrastructure, protecting against prompt injection, implementing guardrails, input/output filtering, and inference pipeline hardening.","nistAiRmfMapping":"MANAGE 2.2 — Mechanisms for monitoring and responding to AI risks in deployment","owaspMapping":"LLM01 — Prompt Injection, LLM02 — Insecure Output, LLM05 — Supply Chain Vulnerabilities, LLM06 — Sensitive Information Disclosure","mitreAtlasMapping":"AML.T0051 — LLM Prompt Injection, AML.T0054 — LLM Jailbreak, AML.T0040 — ML Model Inference API Access","threats":["Prompt injection attacks (direct and indirect)","Data exfiltration through model responses","Model denial of service (resource exhaustion)","Model theft via repeated API queries","Adversarial inputs in production traffic","Insecure inference pipeline dependencies"],"controls":["Input validation and prompt sanitization","Output filtering and content safety checks","Rate limiting and usage quotas","Model access controls and authentication","Guardrails for content safety and topic control","Inference pipeline dependency scanning"],"tools":[{"name":"NeMo Guardrails (NVIDIA)","foundation":"community","url":"https://github.com/NVIDIA/NeMo-Guardrails","description":"Programmable guardrails for LLM applications — controls topics, prevents jailbreaks, blocks harmful outputs, and enables custom safety policies.","maturity":"active","controlsCovered":["Guardrails for content safety and topic control","Output filtering and content safety checks","Input validation and prompt sanitization"]},{"name":"LLM Guard (Protect AI)","foundation":"community","url":"https://github.com/protectai/llm-guard","description":"Self-hosted toolkit for sanitizing LLM interactions — scans prompts and outputs for prompt injection, PII, toxicity, and banned content.","maturity":"active","controlsCovered":["Input validation and prompt sanitization","Output filtering and content safety checks"]},{"name":"Guardrails AI","foundation":"community","url":"https://www.guardrailsai.com","description":"Framework for adding structural, type, and quality guarantees to LLM outputs — validates responses against schemas and safety policies.","maturity":"active","controlsCovered":["Output filtering and content safety checks","Guardrails for content safety and topic control"]},{"name":"Rebuff","foundation":"community","url":"https://github.com/protectai/rebuff","description":"Self-hardening prompt injection detector — uses multi-layered defense including heuristics, LLM-based detection, and canary token injection.","maturity":"experimental","controlsCovered":["Input validation and prompt sanitization"]},{"name":"OWASP LLM Top 10","foundation":"owasp","url":"https://owasp.org/www-project-top-10-for-large-language-model-applications/","description":"Definitive guide to the top 10 security risks for LLM applications — provides descriptions, examples, prevention strategies, and attack scenarios.","maturity":"active","controlsCovered":["Input validation and prompt sanitization","Output filtering and content safety checks","Guardrails for content safety and topic control"]},{"name":"LangKit (WhyLabs)","foundation":"community","url":"https://github.com/whylabs/langkit","description":"Open source text metrics toolkit for LLM monitoring — detects prompt injection, PII, toxicity, relevance, and sentiment in real-time.","maturity":"active","controlsCovered":["Input validation and prompt sanitization","Output filtering and content safety checks"]},{"name":"Vigil","foundation":"community","url":"https://github.com/deadbits/vigil-llm","description":"LLM prompt injection detection tool — uses multiple detection methods including vector similarity, YARA rules, and ML classifiers.","maturity":"active","controlsCovered":["Input validation and prompt sanitization"]}],"gaps":[{"title":"Prompt injection defense maturity","severity":"red","description":"No defense reliably prevents all forms of prompt injection. Current tools reduce risk but determined attackers can still bypass guardrails."},{"title":"Standardized guardrail specification","severity":"yellow","description":"Each guardrail framework has its own configuration format. No standard for defining, sharing, or composing safety policies across tools."},{"title":"Agent/tool-use security","severity":"red","description":"LLM agents with tool access (code execution, API calls, file system) create new attack surfaces. No comprehensive framework secures agentic AI systems."}]},{"id":"monitoring","number":8,"name":"Monitoring, Governance & Response","shortName":"Governance","icon":"🛡️","description":"Continuous monitoring of deployed AI systems, drift detection, abuse monitoring, regulatory compliance, incident response for AI-specific threats, and governance frameworks.","nistAiRmfMapping":"MANAGE 3.1, 3.2, 4.1 — Continuous monitoring, incident response, compliance","owaspMapping":"ML09 — Output Integrity Attack, ML08 — Model Skewing","mitreAtlasMapping":"AML.T0031 — Erode ML Model Integrity, AML.T0024 — Exfiltration via ML Inference API","threats":["Model drift degrading accuracy over time","Data drift changing input distributions","Adversarial abuse at scale in production","Regulatory non-compliance (EU AI Act, etc.)","Model behavior regression after updates","Lack of incident response playbooks for AI"],"controls":["Model performance and drift monitoring","Data drift detection and alerting","Abuse pattern detection and rate limiting","Regulatory compliance tracking (AI Act, etc.)","AI incident response playbooks","Model rollback and versioned deployment"],"tools":[{"name":"Evidently AI","foundation":"community","url":"https://www.evidentlyai.com","description":"Open source ML observability platform — monitors data drift, model performance, target drift, and data quality with interactive dashboards.","maturity":"production","controlsCovered":["Model performance and drift monitoring","Data drift detection and alerting"]},{"name":"WhyLabs / whylogs","foundation":"community","url":"https://github.com/whylabs/whylogs","description":"Data and ML monitoring library — profiles datasets and model outputs for drift detection, data quality monitoring, and anomaly detection.","maturity":"production","controlsCovered":["Data drift detection and alerting","Model performance and drift monitoring"]},{"name":"NIST AI Risk Management Framework","foundation":"nist","url":"https://airc.nist.gov/AI_RMF_Playbook","description":"Comprehensive AI risk management framework — GOVERN, MAP, MEASURE, MANAGE functions for organizations deploying AI systems responsibly.","maturity":"standard","controlsCovered":["Regulatory compliance tracking (AI Act, etc.)","AI incident response playbooks"]},{"name":"MITRE ATLAS","foundation":"mitre","url":"https://atlas.mitre.org","description":"Adversarial Threat Landscape for AI Systems — knowledge base of adversarial techniques, tactics, and case studies specific to ML systems.","maturity":"active","controlsCovered":["AI incident response playbooks","Abuse pattern detection and rate limiting"]},{"name":"CoSAI (Coalition for Secure AI)","foundation":"oasis","url":"https://www.coalitionforsecureai.org","description":"OASIS collaboration developing comprehensive AI security frameworks — includes governance, risk assessment, and incident response standards.","maturity":"forming","controlsCovered":["Regulatory compliance tracking (AI Act, etc.)","AI incident response playbooks"]},{"name":"AI Incident Database","foundation":"community","url":"https://incidentdatabase.ai","description":"Public database tracking AI incidents and controversies — enables pattern analysis and lessons learned for AI incident response.","maturity":"active","controlsCovered":["AI incident response playbooks"]},{"name":"ISO/IEC 42001 (AI Management System)","foundation":"community","url":"https://www.iso.org/standard/81230.html","description":"International standard for AI management systems — provides requirements for establishing, implementing, and improving AI governance within organizations.","maturity":"standard","controlsCovered":["Regulatory compliance tracking (AI Act, etc.)"]},{"name":"OWASP ML Top 10","foundation":"owasp","url":"https://owasp.org/www-project-machine-learning-security-top-10/","description":"Top 10 security risks for machine learning systems — covers input manipulation, data poisoning, model stealing, and supply chain attacks.","maturity":"active","controlsCovered":["AI incident response playbooks","Abuse pattern detection and rate limiting"]}],"gaps":[{"title":"AI-specific incident response","severity":"red","description":"No standardized incident response framework exists for AI-specific incidents (model poisoning, adversarial attacks, prompt injection at scale). Traditional IR doesn't apply."},{"title":"EU AI Act compliance tooling","severity":"yellow","description":"EU AI Act is in effect but automated compliance checking and evidence generation tools are immature. Organizations must manually assess conformity."},{"title":"Cross-org AI incident coordination","severity":"red","description":"No equivalent of CERT or CSAF for AI-specific incidents. When a foundation model has a security issue, no standard process coordinates response across downstream users."},{"title":"Real-time adversarial detection at scale","severity":"yellow","description":"Detecting adversarial inputs in real-time production traffic without unacceptable latency overhead remains an unsolved engineering challenge."}]}],"crossCuttingGaps":[{"title":"End-to-End AI Supply Chain Standard","severity":"red","phases":["data","training","packaging","registry","evaluation","aibom","deployment","monitoring"],"description":"No equivalent of SLSA exists for AI. No framework provides graduated levels of supply chain security assurance across the full ML lifecycle from data to deployment."},{"title":"Foundation Model Transparency","severity":"red","phases":["data","training","aibom"],"description":"Most foundation model providers do not disclose training data, training process details, or comprehensive safety evaluation results. Downstream users cannot assess supply chain risk."},{"title":"AI Security Tooling Fragmentation","severity":"yellow","phases":["evaluation","deployment","monitoring"],"description":"Dozens of overlapping tools with different interfaces, configuration formats, and coverage gaps. No unified security pipeline spans evaluation through production monitoring."},{"title":"Fine-Tuning Chain of Custody","severity":"red","phases":["training","packaging","registry"],"description":"Models are fine-tuned, merged, quantized, and distilled across organizations. No standard tracks the full provenance chain from base model through each transformation."},{"title":"Agentic AI Security","severity":"red","phases":["deployment","monitoring"],"description":"LLM agents with tool access (code execution, web browsing, API calls) create new supply chain attack surfaces that existing frameworks do not address."},{"title":"Regulatory Alignment","severity":"yellow","phases":["aibom","monitoring"],"description":"EU AI Act, NIST AI RMF, and other regulations have different requirements. No unified compliance framework maps across all regulatory regimes."}],"frameworks":[{"name":"NIST AI Risk Management Framework (AI RMF 1.0)","foundation":"nist","url":"https://airc.nist.gov/AI_RMF_Playbook","description":"Comprehensive voluntary framework for managing AI risks through GOVERN, MAP, MEASURE, and MANAGE functions. Aligned with US Executive Order on AI.","phases":["data","training","evaluation","aibom","deployment","monitoring"]},{"name":"MITRE ATLAS (Adversarial Threat Landscape for AI Systems)","foundation":"mitre","url":"https://atlas.mitre.org","description":"Knowledge base of adversarial ML tactics and techniques — AI-specific extension of ATT&CK framework for understanding and defending against AI threats.","phases":["data","training","packaging","evaluation","deployment","monitoring"]},{"name":"OWASP ML Top 10","foundation":"owasp","url":"https://owasp.org/www-project-machine-learning-security-top-10/","description":"Top 10 security risks for ML systems — input manipulation, data poisoning, model inversion, membership inference, model theft, and supply chain attacks.","phases":["data","training","packaging","evaluation","deployment"]},{"name":"OWASP Top 10 for LLM Applications","foundation":"owasp","url":"https://owasp.org/www-project-top-10-for-large-language-model-applications/","description":"Top 10 risks specific to LLM-powered applications — prompt injection, insecure output handling, training data poisoning, model DoS, and supply chain vulnerabilities.","phases":["data","evaluation","deployment","monitoring"]},{"name":"EU AI Act","foundation":"community","url":"https://artificialintelligenceact.eu","description":"European Union regulation on AI — risk-based classification system requiring conformity assessments, transparency obligations, and documentation for high-risk AI systems.","phases":["data","aibom","evaluation","deployment","monitoring"]},{"name":"ISO/IEC 42001 (AI Management System)","foundation":"community","url":"https://www.iso.org/standard/81230.html","description":"International standard for establishing, implementing, maintaining, and improving an AI management system within an organization.","phases":["data","training","evaluation","aibom","deployment","monitoring"]},{"name":"Coalition for Secure AI (CoSAI)","foundation":"oasis","url":"https://www.coalitionforsecureai.org","description":"OASIS-hosted initiative bringing together industry leaders to develop practical AI security specifications and tools.","phases":["training","packaging","evaluation","deployment","monitoring"]}]};
+
+// ==================== THEME TOGGLE ====================
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const icon = document.getElementById('toggle-icon');
+  const label = document.getElementById('toggle-label');
+  if (icon && label) {
+    icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+    label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('ai-ssc-theme', next); } catch(e) {}
+}
+
+(function() {
+  let saved = 'dark';
+  try { saved = localStorage.getItem('ai-ssc-theme') || 'dark'; } catch(e) {}
+  applyTheme(saved);
+})();
+
+// ==================== BOOT ====================
+loadData();
+</script>
+</body>
+</html>

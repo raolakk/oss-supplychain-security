@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Source Supply Chain Security Landscape</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  :root, [data-theme="dark"] {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --bg-card-hover: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-bright: #ffffff;
+    --accent: #58a6ff;
+    --accent-dim: #1f6feb;
+    --red: #f85149;
+    --red-bg: rgba(248,81,73,0.15);
+    --yellow: #d29922;
+    --yellow-bg: rgba(210,153,34,0.15);
+    --green: #3fb950;
+    --green-bg: rgba(63,185,80,0.15);
+    --openssf: #4B8BBE;
+    --cncf: #446ca9;
+    --oasis: #E97627;
+    --eclipse: #6a5acd;
+    --owasp: #8c8c8c;
+    --lf: #009639;
+    --ietf: #1A5276;
+    --community: #888888;
+    --shadow: rgba(0,0,0,0.4);
+    --header-gradient-start: #161b22;
+  }
+  [data-theme="light"] {
+    --bg: #f6f8fa;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f0f3f6;
+    --border: #d0d7de;
+    --text: #1f2328;
+    --text-dim: #656d76;
+    --text-bright: #000000;
+    --accent: #0969da;
+    --accent-dim: #0550ae;
+    --red: #cf222e;
+    --red-bg: rgba(207,34,46,0.1);
+    --yellow: #9a6700;
+    --yellow-bg: rgba(154,103,0,0.1);
+    --green: #1a7f37;
+    --green-bg: rgba(26,127,55,0.1);
+    --openssf: #2b6cb0;
+    --cncf: #2c5282;
+    --oasis: #c05621;
+    --eclipse: #553c9a;
+    --owasp: #4a5568;
+    --lf: #276749;
+    --ietf: #1A5276;
+    --community: #718096;
+    --shadow: rgba(0,0,0,0.1);
+    --header-gradient-start: #edf2f7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    padding: 24px 32px 16px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--header-gradient-start) 0%, var(--bg) 100%);
+  }
+  .header h1 { font-size: 28px; font-weight: 700; color: var(--text-bright); margin-bottom: 6px; }
+  .header .subtitle { color: var(--text-dim); font-size: 14px; max-width: 800px; margin: 0 auto 12px; }
+  .header .legend {
+    display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 8px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-dim);
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+  }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex; justify-content: center; gap: 4px; padding: 12px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .tab-btn {
+    padding: 8px 18px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-dim); border-radius: 6px; cursor: pointer; font-size: 13px;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { background: var(--bg-card); color: var(--text); }
+  .tab-btn.active {
+    background: var(--accent-dim); color: var(--text-bright);
+    border-color: var(--accent);
+  }
+
+  /* Search / Filter Bar */
+  .filter-bar {
+    display: flex; justify-content: center; gap: 12px; padding: 12px 32px;
+    flex-wrap: wrap; align-items: center;
+  }
+  .filter-bar input {
+    padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text); font-size: 13px; width: 280px;
+    outline: none;
+  }
+  .filter-bar input:focus { border-color: var(--accent); }
+  .filter-bar select {
+    padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text); font-size: 13px; outline: none;
+    cursor: pointer;
+  }
+  .filter-bar select:focus { border-color: var(--accent); }
+
+  /* Views */
+  .view { display: none; padding: 24px 32px; }
+  .view.active { display: block; }
+
+  /* ===== PIPELINE VIEW ===== */
+  #pipeline-view { max-width: 1400px; margin: 0 auto; }
+  .pipeline {
+    display: flex; align-items: stretch; gap: 0;
+    overflow-x: auto; padding: 20px 0;
+  }
+  .phase-node {
+    flex: 0 0 auto; width: 155px; min-height: 140px;
+    background: var(--bg-card); border: 2px solid var(--border);
+    border-radius: 12px; padding: 14px 12px; text-align: center;
+    cursor: pointer; transition: all 0.25s; position: relative;
+  }
+  .phase-node:hover {
+    border-color: var(--accent); background: var(--bg-card-hover);
+    transform: translateY(-4px); box-shadow: 0 6px 20px var(--shadow);
+  }
+  .phase-node.selected {
+    border-color: var(--accent); background: var(--bg-card-hover);
+    box-shadow: 0 0 0 3px rgba(88,166,255,0.2);
+  }
+  .phase-icon { font-size: 28px; margin-bottom: 6px; }
+  .phase-number {
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .phase-name {
+    font-size: 13px; font-weight: 600; color: var(--text-bright);
+    margin: 4px 0;
+  }
+  .phase-stats {
+    display: flex; justify-content: center; gap: 8px; margin-top: 8px;
+  }
+  .stat-badge {
+    font-size: 10px; padding: 2px 7px; border-radius: 10px;
+    font-weight: 600;
+  }
+  .stat-tools { background: var(--green-bg); color: var(--green); }
+  .stat-gaps-r { background: var(--red-bg); color: var(--red); }
+  .stat-gaps-y { background: var(--yellow-bg); color: var(--yellow); }
+  .arrow {
+    flex: 0 0 30px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); font-size: 20px;
+  }
+
+  /* Detail Panel */
+  .detail-panel {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; margin-top: 24px; padding: 24px;
+    display: none; animation: fadeIn 0.3s ease;
+  }
+  .detail-panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .detail-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .detail-header .phase-icon { font-size: 36px; margin: 0; }
+  .detail-header h2 { font-size: 20px; color: var(--text-bright); }
+  .detail-desc { color: var(--text-dim); font-size: 14px; margin-bottom: 8px; }
+  .detail-mapping {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .mapping-badge {
+    font-size: 11px; padding: 4px 10px; border-radius: 6px;
+    background: rgba(88,166,255,0.1); color: var(--accent); border: 1px solid rgba(88,166,255,0.2);
+  }
+
+  .detail-section { margin-top: 20px; }
+  .detail-section h3 {
+    font-size: 15px; color: var(--text-bright); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .detail-section h3 .count-badge {
+    font-size: 11px; background: var(--accent-dim); color: #fff;
+    padding: 1px 8px; border-radius: 10px;
+  }
+
+  /* Threat list */
+  .threat-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;
+  }
+  .threat-item {
+    font-size: 13px; color: var(--text); padding: 8px 12px;
+    background: rgba(248,81,73,0.06); border-left: 3px solid var(--red);
+    border-radius: 4px;
+  }
+
+  /* Control list */
+  .control-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;
+  }
+  .control-item {
+    font-size: 13px; color: var(--text); padding: 8px 12px;
+    background: rgba(63,185,80,0.06); border-left: 3px solid var(--green);
+    border-radius: 4px;
+  }
+
+  /* Tool cards */
+  .tool-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px;
+  }
+  .tool-card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px;
+    transition: border-color 0.2s;
+  }
+  .tool-card:hover { border-color: var(--accent); }
+  .tool-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .tool-card-title {
+    font-size: 14px; font-weight: 600; color: var(--text-bright);
+  }
+  .tool-card-title a {
+    color: var(--accent); text-decoration: none;
+  }
+  .tool-card-title a:hover { text-decoration: underline; }
+  .foundation-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px;
+    border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+    color: #fff;
+  }
+  .badge-openssf { background: var(--openssf); }
+  .badge-cncf { background: var(--cncf); }
+  .badge-oasis { background: var(--oasis); }
+  .badge-eclipse { background: var(--eclipse); }
+  .badge-owasp { background: var(--owasp); }
+  .badge-lf { background: var(--lf); }
+  .badge-ietf { background: var(--ietf); }
+  .badge-community { background: var(--community); }
+  .tool-card-desc { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+  .tool-card-meta {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .maturity-badge {
+    font-size: 10px; padding: 2px 7px; border-radius: 8px;
+    background: rgba(88,166,255,0.1); color: var(--accent);
+    border: 1px solid rgba(88,166,255,0.15);
+  }
+  .controls-covered {
+    font-size: 10px; padding: 2px 7px; border-radius: 8px;
+    background: rgba(63,185,80,0.08); color: var(--green);
+    border: 1px solid rgba(63,185,80,0.15);
+  }
+
+  /* Gap cards */
+  .gap-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px;
+  }
+  .gap-card {
+    padding: 14px; border-radius: 8px; border: 1px solid;
+  }
+  .gap-card.red { background: var(--red-bg); border-color: rgba(248,81,73,0.3); }
+  .gap-card.yellow { background: var(--yellow-bg); border-color: rgba(210,153,34,0.3); }
+  .gap-card-title {
+    font-size: 14px; font-weight: 600; margin-bottom: 4px;
+  }
+  .gap-card.red .gap-card-title { color: var(--red); }
+  .gap-card.yellow .gap-card-title { color: var(--yellow); }
+  .gap-card-desc { font-size: 12px; color: var(--text-dim); }
+  .gap-severity-indicator {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 4px;
+  }
+  .gap-severity-indicator.red { background: var(--red); }
+  .gap-severity-indicator.yellow { background: var(--yellow); }
+
+  /* ===== HEATMAP VIEW ===== */
+  #heatmap-view { max-width: 1200px; margin: 0 auto; }
+  .heatmap-container { overflow-x: auto; }
+  .heatmap-table {
+    width: 100%; border-collapse: separate; border-spacing: 3px;
+    font-size: 13px;
+  }
+  .heatmap-table th {
+    padding: 10px 8px; text-align: center; color: var(--text-dim);
+    font-weight: 600; font-size: 12px;
+  }
+  .heatmap-table th.phase-col { writing-mode: horizontal-tb; min-width: 100px; }
+  .heatmap-table th.row-header {
+    text-align: right; padding-right: 14px; min-width: 120px;
+    color: var(--text);
+  }
+  .heatmap-cell {
+    text-align: center; padding: 16px 8px; border-radius: 6px;
+    cursor: pointer; transition: all 0.2s; position: relative;
+    font-weight: 700; font-size: 16px;
+  }
+  .heatmap-cell:hover {
+    transform: scale(1.08); box-shadow: 0 4px 12px var(--shadow);
+    z-index: 10;
+  }
+  .heatmap-cell .cell-count { display: block; font-size: 18px; }
+  .heatmap-cell .cell-label { display: block; font-size: 9px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
+  [data-theme="dark"] .heat-0, :root .heat-0 { background: rgba(255,255,255,0.03); color: var(--text-dim); }
+  [data-theme="light"] .heat-0 { background: rgba(0,0,0,0.03); color: var(--text-dim); }
+  .heat-1 { background: rgba(63,185,80,0.15); color: var(--green); }
+  .heat-2 { background: rgba(63,185,80,0.25); color: var(--green); }
+  .heat-3 { background: rgba(63,185,80,0.4); color: #fff; }
+  .heat-4 { background: rgba(63,185,80,0.55); color: #fff; }
+  .heat-5 { background: rgba(63,185,80,0.7); color: #fff; }
+  [data-theme="light"] .heat-3,
+  [data-theme="light"] .heat-4,
+  [data-theme="light"] .heat-5 { color: #fff; }
+
+  /* Heatmap tooltip */
+  .heatmap-tooltip {
+    position: fixed; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px; font-size: 12px;
+    color: var(--text); max-width: 300px; z-index: 1000;
+    pointer-events: none; display: none;
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+  .heatmap-tooltip .tt-title { font-weight: 700; color: var(--text-bright); margin-bottom: 6px; }
+  .heatmap-tooltip .tt-tools { color: var(--text-dim); }
+
+  /* ===== GAPS VIEW ===== */
+  #gaps-view { max-width: 1100px; margin: 0 auto; }
+  .cross-cut-section { margin-bottom: 32px; }
+  .cross-cut-section h2 {
+    font-size: 18px; color: var(--text-bright); margin-bottom: 16px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .cross-cut-card {
+    padding: 16px; border-radius: 8px; border: 1px solid;
+    margin-bottom: 12px;
+  }
+  .cross-cut-card.red { background: var(--red-bg); border-color: rgba(248,81,73,0.3); }
+  .cross-cut-card.yellow { background: var(--yellow-bg); border-color: rgba(210,153,34,0.3); }
+  .cross-cut-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .cross-cut-card.red .cross-cut-title { color: var(--red); }
+  .cross-cut-card.yellow .cross-cut-title { color: var(--yellow); }
+  .cross-cut-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 8px; }
+  .cross-cut-phases {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .phase-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 8px;
+    background: rgba(88,166,255,0.1); color: var(--accent);
+    border: 1px solid rgba(88,166,255,0.15);
+  }
+
+  /* Per-phase gap summary */
+  .phase-gap-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; cursor: pointer;
+  }
+  .phase-gap-header:hover .pgap-name { color: var(--accent); }
+  .pgap-icon { font-size: 22px; }
+  .pgap-name { font-size: 15px; font-weight: 600; color: var(--text-bright); transition: color 0.2s; }
+  .pgap-badges { display: flex; gap: 6px; margin-left: auto; }
+  .pgap-list { padding-left: 44px; margin-bottom: 16px; }
+
+  /* ===== FRAMEWORKS VIEW ===== */
+  #frameworks-view { max-width: 1100px; margin: 0 auto; }
+  .framework-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .framework-card:hover { border-color: var(--accent); }
+  .framework-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .framework-name {
+    font-size: 16px; font-weight: 700; color: var(--text-bright);
+  }
+  .framework-name a { color: var(--accent); text-decoration: none; }
+  .framework-name a:hover { text-decoration: underline; }
+  .framework-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
+  .framework-phases {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+
+  /* Stats banner */
+  .stats-banner {
+    display: flex; justify-content: center; gap: 32px;
+    padding: 16px 32px; flex-wrap: wrap;
+  }
+  .stat-block { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Theme Toggle */
+  .theme-toggle {
+    position: fixed; top: 16px; right: 20px; z-index: 200;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 6px 14px;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text); transition: all 0.3s;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .theme-toggle:hover { border-color: var(--accent); background: var(--bg-card-hover); }
+  .theme-toggle .toggle-icon { font-size: 16px; transition: transform 0.3s; }
+  .theme-toggle .toggle-label { font-weight: 500; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header h1 { font-size: 22px; }
+    .pipeline { flex-direction: column; align-items: center; }
+    .arrow { transform: rotate(90deg); flex: 0 0 20px; }
+    .phase-node { width: 90%; max-width: 320px; }
+    .tool-grid, .gap-grid { grid-template-columns: 1fr; }
+    .filter-bar input { width: 100%; }
+    .detail-mapping { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark theme">
+  <span class="toggle-icon" id="toggle-icon">🌙</span>
+  <span class="toggle-label" id="toggle-label">Dark</span>
+</button>
+
+<div class="header">
+  <h1>🔗 Open Source Supply Chain Security Landscape</h1>
+  <p class="subtitle">
+    Unified 8-phase model mapping 70+ tools, standards, and frameworks from OpenSSF, CNCF, OASIS, Eclipse, OWASP, LF, IETF, and community projects.
+    Merges SLSA, S2C2F, and NIST SSDF into a single lifecycle view with gap analysis.
+  </p>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--openssf)"></span> OpenSSF</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--cncf)"></span> CNCF</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--oasis)"></span> OASIS</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--eclipse)"></span> Eclipse</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--owasp)"></span> OWASP</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--lf)"></span> LF</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ietf)"></span> IETF</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--community)"></span> Community</span>
+  </div>
+  <a href="ai-supply-chain-security.html" style="display:inline-block;margin-top:12px;font-size:13px;color:var(--accent);text-decoration:none;padding:6px 16px;border:1px solid var(--accent);border-radius:6px;transition:all 0.2s;" onmouseover="this.style.background='var(--accent-dim)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='var(--accent)'">🤖 AI / ML Supply Chain Landscape →</a>
+</div>
+
+<div class="stats-banner" id="stats-banner"></div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="pipeline">Pipeline Flow</button>
+  <button class="tab-btn" data-tab="heatmap">Coverage Heatmap</button>
+  <button class="tab-btn" data-tab="gaps">Gap Analysis</button>
+  <button class="tab-btn" data-tab="frameworks">Frameworks</button>
+</div>
+
+<div class="filter-bar">
+  <input type="text" id="search-input" placeholder="🔍 Search tools, controls, threats...">
+  <select id="foundation-filter">
+    <option value="all">All Foundations</option>
+    <option value="openssf">OpenSSF</option>
+    <option value="cncf">CNCF</option>
+    <option value="oasis">OASIS</option>
+    <option value="eclipse">Eclipse</option>
+    <option value="owasp">OWASP</option>
+    <option value="lf">Linux Foundation</option>
+    <option value="ietf">IETF</option>
+    <option value="community">Community</option>
+  </select>
+  <select id="severity-filter">
+    <option value="all">All Severities</option>
+    <option value="red">🔴 Red (Critical)</option>
+    <option value="yellow">🟡 Yellow (Moderate)</option>
+  </select>
+</div>
+
+<!-- PIPELINE VIEW -->
+<div class="view active" id="pipeline-view">
+  <div class="pipeline" id="pipeline"></div>
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<!-- HEATMAP VIEW -->
+<div class="view" id="heatmap-view">
+  <div class="heatmap-container">
+    <table class="heatmap-table" id="heatmap-table"></table>
+  </div>
+</div>
+
+<!-- GAPS VIEW -->
+<div class="view" id="gaps-view">
+  <div id="gaps-content"></div>
+</div>
+
+<!-- FRAMEWORKS VIEW -->
+<div class="view" id="frameworks-view">
+  <div id="frameworks-content"></div>
+</div>
+
+<!-- Tooltip -->
+<div class="heatmap-tooltip" id="heatmap-tooltip"></div>
+
+<script>
+// ==================== DATA ====================
+const DATA_URL = "data/supply-chain-data.json";
+
+let data = null;
+
+async function loadData() {
+  try {
+    const resp = await fetch(DATA_URL);
+    data = await resp.json();
+  } catch (e) {
+    // Inline fallback: embed data directly if fetch fails (file:// protocol)
+    console.warn("Fetch failed, using inline data:", e);
+    data = await getInlineData();
+  }
+  init();
+}
+
+async function getInlineData() {
+  // Return inline data for file:// protocol usage
+  return INLINE_DATA;
+}
+
+// ==================== INITIALIZATION ====================
+function init() {
+  renderStats();
+  renderPipeline();
+  renderHeatmap();
+  renderGaps();
+  renderFrameworks();
+  setupTabs();
+  setupFilters();
+}
+
+// ==================== STATS BANNER ====================
+function renderStats() {
+  const totalTools = data.phases.reduce((s, p) => s + p.tools.length, 0);
+  const totalGaps = data.phases.reduce((s, p) => s + p.gaps.length, 0) + data.crossCuttingGaps.length;
+  const redGaps = data.phases.reduce((s, p) => s + p.gaps.filter(g => g.severity === "red").length, 0)
+    + data.crossCuttingGaps.filter(g => g.severity === "red").length;
+  const foundations = Object.keys(data.foundations).length;
+
+  document.getElementById("stats-banner").innerHTML = `
+    <div class="stat-block"><div class="stat-num">${totalTools}</div><div class="stat-label">Tools & Standards</div></div>
+    <div class="stat-block"><div class="stat-num">${data.phases.length}</div><div class="stat-label">Lifecycle Phases</div></div>
+    <div class="stat-block"><div class="stat-num">${foundations}</div><div class="stat-label">Foundations</div></div>
+    <div class="stat-block"><div class="stat-num">${totalGaps}</div><div class="stat-label">Identified Gaps</div></div>
+    <div class="stat-block"><div class="stat-num" style="color:var(--red)">${redGaps}</div><div class="stat-label">Critical Gaps</div></div>
+    <div class="stat-block"><div class="stat-num">${data.frameworks.length}</div><div class="stat-label">Frameworks</div></div>
+  `;
+}
+
+// ==================== PIPELINE VIEW ====================
+let selectedPhase = null;
+
+function renderPipeline() {
+  const container = document.getElementById("pipeline");
+  container.innerHTML = "";
+  const searchTerm = (document.getElementById("search-input")?.value || "").toLowerCase();
+  const foundationFilter = document.getElementById("foundation-filter")?.value || "all";
+
+  data.phases.forEach((phase, i) => {
+    if (i > 0) {
+      const arrow = document.createElement("div");
+      arrow.className = "arrow";
+      arrow.innerHTML = "▶";
+      container.appendChild(arrow);
+    }
+    const filteredTools = filterTools(phase.tools, searchTerm, foundationFilter);
+    const redGaps = phase.gaps.filter(g => g.severity === "red").length;
+    const yellowGaps = phase.gaps.filter(g => g.severity === "yellow").length;
+
+    const node = document.createElement("div");
+    node.className = "phase-node" + (selectedPhase === phase.id ? " selected" : "");
+    node.innerHTML = `
+      <div class="phase-icon">${phase.icon}</div>
+      <div class="phase-number">Phase ${phase.number}</div>
+      <div class="phase-name">${phase.shortName}</div>
+      <div class="phase-stats">
+        <span class="stat-badge stat-tools">${filteredTools.length} tools</span>
+        ${redGaps > 0 ? `<span class="stat-badge stat-gaps-r">${redGaps} 🔴</span>` : ""}
+        ${yellowGaps > 0 ? `<span class="stat-badge stat-gaps-y">${yellowGaps} 🟡</span>` : ""}
+      </div>
+    `;
+    node.onclick = () => selectPhase(phase.id);
+    container.appendChild(node);
+  });
+}
+
+function selectPhase(phaseId) {
+  selectedPhase = selectedPhase === phaseId ? null : phaseId;
+  renderPipeline();
+  renderDetailPanel();
+}
+
+function renderDetailPanel() {
+  const panel = document.getElementById("detail-panel");
+  if (!selectedPhase) {
+    panel.className = "detail-panel";
+    panel.innerHTML = "";
+    return;
+  }
+  const phase = data.phases.find(p => p.id === selectedPhase);
+  const searchTerm = (document.getElementById("search-input")?.value || "").toLowerCase();
+  const foundationFilter = document.getElementById("foundation-filter")?.value || "all";
+  const severityFilter = document.getElementById("severity-filter")?.value || "all";
+  const filteredTools = filterTools(phase.tools, searchTerm, foundationFilter);
+  const filteredGaps = filterGaps(phase.gaps, severityFilter, searchTerm);
+
+  panel.className = "detail-panel active";
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div class="phase-icon">${phase.icon}</div>
+      <div>
+        <h2>Phase ${phase.number}: ${phase.name}</h2>
+        <div class="detail-desc">${phase.description}</div>
+      </div>
+    </div>
+    <div class="detail-mapping">
+      <span class="mapping-badge">SLSA: ${phase.slsaMapping}</span>
+      <span class="mapping-badge">S2C2F: ${phase.s2c2fMapping}</span>
+      <span class="mapping-badge">SSDF: ${phase.ssdfMapping}</span>
+    </div>
+
+    <div class="detail-section">
+      <h3>⚠️ Threats <span class="count-badge">${phase.threats.length}</span></h3>
+      <div class="threat-list">
+        ${phase.threats.map(t => `<div class="threat-item">${t}</div>`).join("")}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>🛡️ Controls <span class="count-badge">${phase.controls.length}</span></h3>
+      <div class="control-list">
+        ${phase.controls.map(c => `<div class="control-item">${c}</div>`).join("")}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>🔧 Tools & Standards <span class="count-badge">${filteredTools.length}</span></h3>
+      <div class="tool-grid">
+        ${filteredTools.map(t => renderToolCard(t)).join("")}
+      </div>
+      ${filteredTools.length === 0 ? '<div style="color:var(--text-dim);font-size:13px;padding:12px;">No tools match current filters.</div>' : ""}
+    </div>
+
+    <div class="detail-section">
+      <h3>🚨 Gaps <span class="count-badge">${filteredGaps.length}</span></h3>
+      <div class="gap-grid">
+        ${filteredGaps.map(g => `
+          <div class="gap-card ${g.severity}">
+            <div class="gap-card-title">
+              <span class="gap-severity-indicator ${g.severity}"></span>
+              ${g.title}
+            </div>
+            <div class="gap-card-desc">${g.description}</div>
+          </div>
+        `).join("")}
+      </div>
+      ${filteredGaps.length === 0 ? '<div style="color:var(--text-dim);font-size:13px;padding:12px;">No gaps match current filters.</div>' : ""}
+    </div>
+  `;
+}
+
+function renderToolCard(tool) {
+  const fnd = data.foundations[tool.foundation];
+  return `
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <div class="tool-card-title"><a href="${escapeHtml(tool.url)}" target="_blank" rel="noopener">${escapeHtml(tool.name)}</a></div>
+        <span class="foundation-badge badge-${tool.foundation}">${fnd ? fnd.abbr : tool.foundation}</span>
+      </div>
+      <div class="tool-card-desc">${escapeHtml(tool.description)}</div>
+      <div class="tool-card-meta">
+        <span class="maturity-badge">${escapeHtml(tool.maturity)}</span>
+        ${tool.controlsCovered.map(c => `<span class="controls-covered" title="${escapeHtml(c)}">${truncate(c, 35)}</span>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
+// ==================== HEATMAP VIEW ====================
+function renderHeatmap() {
+  const table = document.getElementById("heatmap-table");
+  const foundationKeys = Object.keys(data.foundations);
+  const searchTerm = (document.getElementById("search-input")?.value || "").toLowerCase();
+  const foundationFilter = document.getElementById("foundation-filter")?.value || "all";
+
+  // Build matrix
+  const matrix = {};
+  data.phases.forEach(phase => {
+    matrix[phase.id] = {};
+    foundationKeys.forEach(fk => {
+      const tools = phase.tools.filter(t => t.foundation === fk);
+      const filtered = filterTools(tools, searchTerm, foundationFilter === "all" ? "all" : foundationFilter);
+      matrix[phase.id][fk] = filtered;
+    });
+  });
+
+  let html = "<thead><tr><th></th>";
+  data.phases.forEach(p => {
+    html += `<th class="phase-col">${p.icon}<br>${p.shortName}</th>`;
+  });
+  html += "</tr></thead><tbody>";
+
+  foundationKeys.forEach(fk => {
+    if (foundationFilter !== "all" && fk !== foundationFilter) return;
+    const fnd = data.foundations[fk];
+    html += `<tr><th class="row-header"><span class="foundation-badge badge-${fk}">${fnd.abbr}</span></th>`;
+    data.phases.forEach(p => {
+      const tools = matrix[p.id][fk];
+      const count = tools.length;
+      const heatClass = count === 0 ? "heat-0" : count === 1 ? "heat-1" : count === 2 ? "heat-2" : count === 3 ? "heat-3" : count <= 4 ? "heat-4" : "heat-5";
+      html += `<td class="heatmap-cell ${heatClass}"
+        data-phase="${p.id}" data-foundation="${fk}"
+        onmouseenter="showHeatTooltip(event,'${p.id}','${fk}')"
+        onmouseleave="hideHeatTooltip()">
+        <span class="cell-count">${count}</span>
+        <span class="cell-label">${count === 1 ? 'tool' : 'tools'}</span>
+      </td>`;
+    });
+    html += "</tr>";
+  });
+
+  // Gaps row
+  html += `<tr><th class="row-header" style="color:var(--red);font-weight:700">🚨 Gaps</th>`;
+  data.phases.forEach(p => {
+    const red = p.gaps.filter(g => g.severity === "red").length;
+    const yellow = p.gaps.filter(g => g.severity === "yellow").length;
+    const cellColor = red > 0 ? "background:var(--red-bg);color:var(--red)" : yellow > 0 ? "background:var(--yellow-bg);color:var(--yellow)" : "background:var(--green-bg);color:var(--green)";
+    html += `<td class="heatmap-cell" style="${cellColor}"
+      data-phase="${p.id}" data-type="gaps"
+      onmouseenter="showGapTooltip(event,'${p.id}')"
+      onmouseleave="hideHeatTooltip()">
+      <span class="cell-count">${red > 0 ? "🔴 " + red : ""}${red > 0 && yellow > 0 ? " " : ""}${yellow > 0 ? "🟡 " + yellow : ""}${red === 0 && yellow === 0 ? "✅" : ""}</span>
+    </td>`;
+  });
+  html += "</tr>";
+
+  html += "</tbody>";
+  table.innerHTML = html;
+}
+
+function showHeatTooltip(event, phaseId, foundationKey) {
+  const phase = data.phases.find(p => p.id === phaseId);
+  const fnd = data.foundations[foundationKey];
+  const tools = phase.tools.filter(t => t.foundation === foundationKey);
+  if (tools.length === 0) return;
+
+  const tooltip = document.getElementById("heatmap-tooltip");
+  tooltip.innerHTML = `
+    <div class="tt-title">${fnd.abbr} → ${phase.shortName}</div>
+    <div class="tt-tools">${tools.map(t => `• ${t.name} <em>(${t.maturity})</em>`).join("<br>")}</div>
+  `;
+  tooltip.style.display = "block";
+  positionTooltip(tooltip, event);
+}
+
+function showGapTooltip(event, phaseId) {
+  const phase = data.phases.find(p => p.id === phaseId);
+  const tooltip = document.getElementById("heatmap-tooltip");
+  tooltip.innerHTML = `
+    <div class="tt-title">${phase.shortName} — Gaps</div>
+    <div class="tt-tools">${phase.gaps.map(g => `<span class="gap-severity-indicator ${g.severity}"></span> ${g.title}`).join("<br>")}</div>
+  `;
+  tooltip.style.display = "block";
+  positionTooltip(tooltip, event);
+}
+
+function positionTooltip(tooltip, event) {
+  let x = event.clientX + 12;
+  let y = event.clientY + 12;
+  if (x + 310 > window.innerWidth) x = event.clientX - 310;
+  if (y + 200 > window.innerHeight) y = event.clientY - 200;
+  tooltip.style.left = x + "px";
+  tooltip.style.top = y + "px";
+}
+
+function hideHeatTooltip() {
+  document.getElementById("heatmap-tooltip").style.display = "none";
+}
+
+// ==================== GAPS VIEW ====================
+function renderGaps() {
+  const container = document.getElementById("gaps-content");
+  const severityFilter = document.getElementById("severity-filter")?.value || "all";
+  const searchTerm = (document.getElementById("search-input")?.value || "").toLowerCase();
+
+  let html = '<div class="cross-cut-section"><h2>🌐 Cross-Cutting Gaps (Multi-Phase)</h2>';
+  const crossFiltered = data.crossCuttingGaps.filter(g => {
+    if (severityFilter !== "all" && g.severity !== severityFilter) return false;
+    if (searchTerm && !g.title.toLowerCase().includes(searchTerm) && !g.description.toLowerCase().includes(searchTerm)) return false;
+    return true;
+  });
+  crossFiltered.forEach(g => {
+    html += `
+      <div class="cross-cut-card ${g.severity}">
+        <div class="cross-cut-title"><span class="gap-severity-indicator ${g.severity}"></span> ${g.title}</div>
+        <div class="cross-cut-desc">${g.description}</div>
+        <div class="cross-cut-phases">
+          ${g.phases.map(pid => {
+            const p = data.phases.find(pp => pp.id === pid);
+            return `<span class="phase-tag">${p ? p.icon + " " + p.shortName : pid}</span>`;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  });
+  if (crossFiltered.length === 0) html += '<p style="color:var(--text-dim);padding:12px;">No cross-cutting gaps match filters.</p>';
+  html += "</div>";
+
+  html += '<div class="cross-cut-section"><h2>📋 Per-Phase Gap Breakdown</h2>';
+  data.phases.forEach(phase => {
+    const gaps = filterGaps(phase.gaps, severityFilter, searchTerm);
+    const red = gaps.filter(g => g.severity === "red").length;
+    const yellow = gaps.filter(g => g.severity === "yellow").length;
+    html += `
+      <div class="phase-gap-header">
+        <span class="pgap-icon">${phase.icon}</span>
+        <span class="pgap-name">${phase.name}</span>
+        <span class="pgap-badges">
+          ${red > 0 ? `<span class="stat-badge stat-gaps-r">${red} critical</span>` : ""}
+          ${yellow > 0 ? `<span class="stat-badge stat-gaps-y">${yellow} moderate</span>` : ""}
+          ${red === 0 && yellow === 0 ? `<span class="stat-badge stat-tools">✅ No gaps</span>` : ""}
+        </span>
+      </div>
+      <div class="pgap-list">
+        <div class="gap-grid">
+          ${gaps.map(g => `
+            <div class="gap-card ${g.severity}">
+              <div class="gap-card-title"><span class="gap-severity-indicator ${g.severity}"></span> ${g.title}</div>
+              <div class="gap-card-desc">${g.description}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  });
+  html += "</div>";
+
+  container.innerHTML = html;
+}
+
+// ==================== FRAMEWORKS VIEW ====================
+function renderFrameworks() {
+  const container = document.getElementById("frameworks-content");
+  let html = "<h2 style='font-size:18px;color:var(--text-bright);margin-bottom:16px;'>Overarching Frameworks & Standards</h2>";
+  data.frameworks.forEach(fw => {
+    const fnd = data.foundations[fw.foundation];
+    html += `
+      <div class="framework-card">
+        <div class="framework-header">
+          <div class="framework-name"><a href="${escapeHtml(fw.url)}" target="_blank" rel="noopener">${escapeHtml(fw.name)}</a></div>
+          <span class="foundation-badge badge-${fw.foundation}">${fnd ? fnd.abbr : fw.foundation}</span>
+        </div>
+        <div class="framework-desc">${escapeHtml(fw.description)}</div>
+        <div class="framework-phases">
+          ${fw.phases.map(pid => {
+            const p = data.phases.find(pp => pp.id === pid);
+            return `<span class="phase-tag">${p ? p.icon + " " + p.shortName : pid}</span>`;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+// ==================== TABS ====================
+function setupTabs() {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab + "-view").classList.add("active");
+    };
+  });
+}
+
+// ==================== FILTERS ====================
+function setupFilters() {
+  const refresh = () => {
+    renderPipeline();
+    renderDetailPanel();
+    renderHeatmap();
+    renderGaps();
+  };
+  document.getElementById("search-input").addEventListener("input", debounce(refresh, 250));
+  document.getElementById("foundation-filter").addEventListener("change", refresh);
+  document.getElementById("severity-filter").addEventListener("change", refresh);
+}
+
+// ==================== HELPERS ====================
+function filterTools(tools, searchTerm, foundationFilter) {
+  return tools.filter(t => {
+    if (foundationFilter !== "all" && t.foundation !== foundationFilter) return false;
+    if (searchTerm) {
+      const haystack = (t.name + " " + t.description + " " + t.controlsCovered.join(" ")).toLowerCase();
+      if (!haystack.includes(searchTerm)) return false;
+    }
+    return true;
+  });
+}
+
+function filterGaps(gaps, severityFilter, searchTerm) {
+  return gaps.filter(g => {
+    if (severityFilter !== "all" && g.severity !== severityFilter) return false;
+    if (searchTerm) {
+      const haystack = (g.title + " " + g.description).toLowerCase();
+      if (!haystack.includes(searchTerm)) return false;
+    }
+    return true;
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+function truncate(str, len) {
+  return str.length > len ? str.slice(0, len) + "…" : str;
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+// ==================== INLINE DATA FALLBACK ====================
+// For file:// protocol, inline the data directly
+const INLINE_DATA = {"metadata":{"title":"Open Source Supply Chain Security Landscape","version":"1.0.0","lastUpdated":"2026-03-31","description":"Comprehensive mapping of open source supply chain security tools, frameworks, and standards across all major foundations and phases.","unifiedModel":"Merges SLSA, S2C2F, SSDF, and CNCF SSC Best Practices into 8 lifecycle phases."},"foundations":{"openssf":{"name":"Open Source Security Foundation (OpenSSF)","url":"https://openssf.org","parent":"Linux Foundation","color":"#4B8BBE","abbr":"OpenSSF"},"cncf":{"name":"Cloud Native Computing Foundation (CNCF)","url":"https://cncf.io","parent":"Linux Foundation","color":"#446ca9","abbr":"CNCF"},"oasis":{"name":"OASIS Open","url":"https://www.oasis-open.org","parent":null,"color":"#E97627","abbr":"OASIS"},"eclipse":{"name":"Eclipse Foundation","url":"https://www.eclipse.org","parent":null,"color":"#2C2255","abbr":"Eclipse"},"owasp":{"name":"OWASP Foundation","url":"https://owasp.org","parent":null,"color":"#404040","abbr":"OWASP"},"lf":{"name":"Linux Foundation (top-level)","url":"https://www.linuxfoundation.org","parent":null,"color":"#009639","abbr":"LF"},"ietf":{"name":"Internet Engineering Task Force","url":"https://www.ietf.org","parent":null,"color":"#1A5276","abbr":"IETF"},"community":{"name":"Community / Independent Projects","url":null,"parent":null,"color":"#888888","abbr":"Community"}},"phases":[{"id":"source","number":1,"name":"Source Code & Version Control","shortName":"Source","icon":"📝","description":"Securing source code repositories, enforcing access controls, branch protections, commit signing, and code review policies.","slsaMapping":"Threats A & B — unauthorized source change, compromised source repo","s2c2fMapping":"N/A (producer-side focus)","ssdfMapping":"PW — Produce Well-Secured Software","threats":["Unauthorized commit injection","Compromised developer credentials","Malicious code review bypass","Repository takeover / hijack","Force-push rewriting history","Insider threat — malicious maintainer"],"controls":["Enforce branch protection rules","Require signed commits (GPG/SSH)","Multi-party code review","Repository access auditing","Secret scanning in commits","Namespace / delegation-based trust"],"tools":[{"name":"gittuf","foundation":"openssf","url":"https://github.com/gittuf/gittuf","description":"Security layer for Git repositories using TUF-based delegation and trust policies for reference state verification.","maturity":"incubating","controlsCovered":["Enforce branch protection rules","Require signed commits (GPG/SSH)","Namespace / delegation-based trust"]},{"name":"OpenSSF Scorecard","foundation":"openssf","url":"https://securityscorecards.dev","description":"Automated security health metrics for open source projects — checks branch protection, CI tests, dependency updates, signed releases, and more.","maturity":"graduated","controlsCovered":["Enforce branch protection rules","Repository access auditing","Multi-party code review"]},{"name":"CII Best Practices Badge","foundation":"openssf","url":"https://www.bestpractices.dev","description":"Self-certification program for FLOSS projects meeting security, quality, and documentation best practices.","maturity":"graduated","controlsCovered":["Repository access auditing","Multi-party code review"]},{"name":"OSPS Baseline","foundation":"openssf","url":"https://baseline.openssf.org","description":"Open Source Project Security Baseline — minimum security requirements for open source projects at different maturity levels.","maturity":"active","controlsCovered":["Enforce branch protection rules","Require signed commits (GPG/SSH)","Multi-party code review","Repository access auditing"]},{"name":"Allstar","foundation":"openssf","url":"https://github.com/ossf/allstar","description":"GitHub App that continuously enforces security best practices on GitHub organizations and repositories.","maturity":"active","controlsCovered":["Enforce branch protection rules","Multi-party code review","Repository access auditing"]},{"name":"Minder","foundation":"openssf","url":"https://github.com/mindersec/minder","description":"Policy-as-code platform for enforcing security profiles across repositories, artifacts, and development workflows.","maturity":"sandbox","controlsCovered":["Enforce branch protection rules","Multi-party code review","Repository access auditing"]},{"name":"SARIF (Static Analysis Results Interchange Format)","foundation":"oasis","url":"https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif","description":"OASIS standard format for static analysis tool output interchange, enabling tool-agnostic code security findings.","maturity":"standard","controlsCovered":["Repository access auditing"]},{"name":"GitHub Secret Scanning","foundation":"community","url":"https://docs.github.com/en/code-security/secret-scanning","description":"Detects accidentally committed secrets, tokens, and credentials in repositories.","maturity":"production","controlsCovered":["Secret scanning in commits"]},{"name":"TruffleHog","foundation":"community","url":"https://github.com/trufflesecurity/trufflehog","description":"Open source secret detection tool scanning Git history, filesystems, and S3 buckets for high-entropy strings and credentials.","maturity":"production","controlsCovered":["Secret scanning in commits"]}],"gaps":[{"title":"Small project adoption barrier","severity":"yellow","description":"Most tools assume GitHub/GitLab with sophisticated CI. Small projects on self-hosted git or alternative forges lack equivalent protections."},{"title":"Insider threat detection","severity":"red","description":"No open source tool effectively detects malicious maintainer behavior patterns (e.g., social engineering takeover like xz-utils)."},{"title":"Cross-forge policy portability","severity":"yellow","description":"Allstar/Minder are GitHub-centric. No universal policy standard for GitLab, Gitea, Forgejo, Bitbucket."}]},{"id":"dependencies","number":2,"name":"Dependency Management & Ingestion","shortName":"Dependencies","icon":"📦","description":"Evaluating, selecting, and securely ingesting open source dependencies. Managing transitive risk, license compliance, and trusted sources.","slsaMapping":"Threats D & H — compromised dependency, typosquatting","s2c2fMapping":"Practice 1 (Ingest It), Practice 6 (Enforce It)","ssdfMapping":"PW.4 — Reuse Existing, Well-Secured Software","threats":["Typosquatting / dependency confusion","Compromised upstream package","Malicious transitive dependency","Abandoned / unmaintained dependency","License compliance violation","Protestware / self-sabotage"],"controls":["Pin dependency versions with lockfiles","Evaluate dependency health before adoption","Use private registry mirrors / proxies","Enforce allowed-list / deny-list policies","Monitor dependency criticality","Automated license compliance checking"],"tools":[{"name":"Criticality Score","foundation":"openssf","url":"https://github.com/ossf/criticality_score","description":"Quantifies the criticality/importance of open source projects based on usage, contributor activity, and dependency metrics.","maturity":"active","controlsCovered":["Evaluate dependency health before adoption","Monitor dependency criticality"]},{"name":"Package Analysis","foundation":"openssf","url":"https://github.com/ossf/package-analysis","description":"Analyzes packages for malicious behavior by running them in sandboxed environments and monitoring system calls, network, and file activity.","maturity":"active","controlsCovered":["Evaluate dependency health before adoption","Enforce allowed-list / deny-list policies"]},{"name":"Package Feeds","foundation":"openssf","url":"https://github.com/ossf/package-feeds","description":"Monitors package registries (npm, PyPI, RubyGems, etc.) for newly published packages to feed into Package Analysis.","maturity":"active","controlsCovered":["Evaluate dependency health before adoption"]},{"name":"S2C2F Specification","foundation":"openssf","url":"https://github.com/ossf/s2c2f","description":"Secure Supply Chain Consumption Framework — prescriptive guide with 8 practices and maturity levels for consuming open source securely.","maturity":"specification","controlsCovered":["Pin dependency versions with lockfiles","Evaluate dependency health before adoption","Use private registry mirrors / proxies","Enforce allowed-list / deny-list policies"]},{"name":"OpenChain (ISO/IEC 5230)","foundation":"lf","url":"https://www.openchainproject.org","description":"International standard for open source license compliance programs — defines processes for managing OSS in supply chains.","maturity":"standard","controlsCovered":["Automated license compliance checking"]},{"name":"OWASP Dependency-Check","foundation":"owasp","url":"https://owasp.org/www-project-dependency-check/","description":"Detects publicly disclosed vulnerabilities in project dependencies by checking against NVD and other vulnerability databases.","maturity":"flagship","controlsCovered":["Evaluate dependency health before adoption"]},{"name":"OWASP SCVS (Software Component Verification Standard)","foundation":"owasp","url":"https://scvs.owasp.org","description":"Framework for identifying activities, controls, and best practices to verify the integrity and security of software components in the supply chain.","maturity":"incubating","controlsCovered":["Pin dependency versions with lockfiles","Evaluate dependency health before adoption","Enforce allowed-list / deny-list policies"]},{"name":"OWASP dep-scan","foundation":"owasp","url":"https://github.com/owasp-dep-scan/dep-scan","description":"Next-generation security audit tool supporting SBOMs, vulnerability scanning, and reachability analysis for multiple ecosystems.","maturity":"incubating","controlsCovered":["Evaluate dependency health before adoption","Automated license compliance checking"]},{"name":"Eclipse Dash License Tool","foundation":"eclipse","url":"https://github.com/eclipse/dash-licenses","description":"Automated license compliance verification for Eclipse Foundation projects — checks dependencies against approved license lists.","maturity":"production","controlsCovered":["Automated license compliance checking"]},{"name":"Renovate","foundation":"community","url":"https://github.com/renovatebot/renovate","description":"Automated dependency update tool supporting 70+ package managers with configurable automerge, grouping, and scheduling policies.","maturity":"production","controlsCovered":["Pin dependency versions with lockfiles"]},{"name":"Socket.dev","foundation":"community","url":"https://socket.dev","description":"Detects supply chain attacks by analyzing package behavior rather than known vulnerabilities — catches typosquatting, install scripts, and obfuscation.","maturity":"production","controlsCovered":["Evaluate dependency health before adoption","Enforce allowed-list / deny-list policies"]}],"gaps":[{"title":"Transitive dependency risk scoring","severity":"yellow","description":"Tools evaluate direct dependencies well but lack depth on transitive chains. No standard for cascading risk scores through dependency trees."},{"title":"Protestware / self-sabotage detection","severity":"red","description":"No automated tooling reliably detects maintainer-initiated sabotage where code changes are intentional but malicious (e.g., colors.js, node-ipc)."},{"title":"Cross-ecosystem policy enforcement","severity":"yellow","description":"Each package ecosystem (npm, PyPI, Maven, Go, Cargo) has different capabilities. No unified ingestion policy engine spans all."}]},{"id":"build","number":3,"name":"Build & CI/CD Integrity","shortName":"Build","icon":"🔨","description":"Ensuring build systems are tamper-resistant, builds are reproducible, and CI/CD pipelines cannot be compromised to inject malicious code.","slsaMapping":"Threats C & E — modified source between review and build, compromised build platform","s2c2fMapping":"Practice 7 (Rebuild It)","ssdfMapping":"PW.6 — Configure Compilation, Interpreter, and Build Processes","threats":["Compromised build system / CI runner","Build script injection","Non-reproducible builds hiding tampering","Dependency substitution at build time","CI/CD secret exfiltration","Pipeline poisoning (PPE attacks)"],"controls":["Hermetic, isolated build environments","Reproducible builds","Build provenance generation (SLSA)","CI/CD pipeline hardening","Build-time dependency pinning (lock + hash)","Ephemeral build environments"],"tools":[{"name":"SLSA Framework","foundation":"openssf","url":"https://slsa.dev","description":"Supply-chain Levels for Software Artifacts — framework defining Build L1-L3 with requirements for provenance, isolation, and hardening.","maturity":"specification","controlsCovered":["Hermetic, isolated build environments","Build provenance generation (SLSA)","Reproducible builds"]},{"name":"SLSA GitHub Generator","foundation":"openssf","url":"https://github.com/slsa-framework/slsa-github-generator","description":"GitHub Actions workflows that generate SLSA Build L3 provenance for Go, container, and generic artifacts.","maturity":"active","controlsCovered":["Build provenance generation (SLSA)","Hermetic, isolated build environments"]},{"name":"FRSCA (Factory for Repeatable Secure Creation of Artifacts)","foundation":"openssf","url":"https://github.com/buildsec/frsca","description":"Reference architecture for secure build pipelines using Tekton, in-toto, SPIFFE/SPIRE, and policy engines.","maturity":"experimental","controlsCovered":["Hermetic, isolated build environments","Build provenance generation (SLSA)","CI/CD pipeline hardening"]},{"name":"in-toto","foundation":"cncf","url":"https://in-toto.io","description":"Framework for securing the integrity of software supply chains by verifying that each step was performed as intended by authorized personnel.","maturity":"graduated","controlsCovered":["Build provenance generation (SLSA)","CI/CD pipeline hardening"]},{"name":"Tekton Chains","foundation":"cncf","url":"https://tekton.dev/docs/chains/","description":"Kubernetes-native supply chain security — automatically signs Tekton TaskRun results and generates in-toto provenance attestations.","maturity":"active","controlsCovered":["Build provenance generation (SLSA)","Hermetic, isolated build environments"]},{"name":"Witness","foundation":"community","url":"https://github.com/in-toto/witness","description":"Pluggable framework for supply chain attestation, building on in-toto — records evidence of each CI/CD step.","maturity":"active","controlsCovered":["Build provenance generation (SLSA)","CI/CD pipeline hardening"]},{"name":"Reproducible Builds","foundation":"community","url":"https://reproducible-builds.org","description":"Cross-ecosystem initiative ensuring deterministic build outputs — enables independent verification that source maps to binary.","maturity":"active","controlsCovered":["Reproducible builds"]},{"name":"Cloud Native Buildpacks","foundation":"cncf","url":"https://buildpacks.io","description":"Transform application source into container images with standardized, auditable build processes — reduces Dockerfile attack surface.","maturity":"incubating","controlsCovered":["Hermetic, isolated build environments","Ephemeral build environments"]}],"gaps":[{"title":"Non-GitHub build provenance","severity":"yellow","description":"SLSA provenance generators are mature for GitHub Actions but limited for GitLab CI, Jenkins, CircleCI, and self-hosted runners."},{"title":"Reproducible builds at scale","severity":"yellow","description":"Despite years of effort, most ecosystems cannot achieve reproducible builds by default. Tooling exists but adoption is low."},{"title":"CI/CD pipeline poisoning detection","severity":"red","description":"No comprehensive open source tool detects pipeline poisoning execution attacks (PPE) in CI configurations."}]},{"id":"signing","number":4,"name":"Artifact Signing & Provenance","shortName":"Signing","icon":"🔏","description":"Cryptographically signing artifacts and generating verifiable provenance attestations to prove authenticity and integrity of software artifacts.","slsaMapping":"Provenance requirements, Build L1-L3 track","s2c2fMapping":"Practice 5 (Audit It)","ssdfMapping":"PS.1/PS.2 — Protect Software","threats":["Artifact tampering post-build","Key compromise / stolen signing keys","Lack of provenance — cannot verify origin","Signature stripping attacks","Long-lived key management burden","Fake provenance / forged attestations"],"controls":["Keyless code signing (short-lived certificates)","Transparency log for signatures","Provenance attestation (in-toto format)","Timestamp authority for signatures","Key management / rotation policies","Verification at consumption time"],"tools":[{"name":"Sigstore","foundation":"openssf","url":"https://sigstore.dev","description":"Umbrella project for keyless signing infrastructure — consists of Cosign, Fulcio, and Rekor for signing, certificate issuance, and transparency logging.","maturity":"graduated","controlsCovered":["Keyless code signing (short-lived certificates)","Transparency log for signatures","Timestamp authority for signatures"]},{"name":"Cosign","foundation":"openssf","url":"https://github.com/sigstore/cosign","description":"Container signing, verification, and storage in an OCI registry. Supports keyless signing via OIDC identity.","maturity":"graduated","controlsCovered":["Keyless code signing (short-lived certificates)","Verification at consumption time"]},{"name":"Fulcio","foundation":"openssf","url":"https://github.com/sigstore/fulcio","description":"Free root CA for code signing certificates — issues short-lived certificates bound to OIDC identities, eliminating long-lived key management.","maturity":"graduated","controlsCovered":["Keyless code signing (short-lived certificates)","Key management / rotation policies"]},{"name":"Rekor","foundation":"openssf","url":"https://github.com/sigstore/rekor","description":"Tamper-resistant transparency log for recording signed metadata — provides an immutable, auditable record of signing events.","maturity":"graduated","controlsCovered":["Transparency log for signatures","Timestamp authority for signatures"]},{"name":"The Update Framework (TUF)","foundation":"cncf","url":"https://theupdateframework.io","description":"Framework for securing software update systems through role-based signing, delegation, and key rotation — protects against various repository attacks.","maturity":"graduated","controlsCovered":["Key management / rotation policies","Verification at consumption time"]},{"name":"Repository Service for TUF (RSTUF)","foundation":"openssf","url":"https://github.com/repository-service-tuf/repository-service-tuf","description":"Production-ready service implementing TUF repository operations — enables package registries to adopt TUF for secure distribution.","maturity":"incubating","controlsCovered":["Key management / rotation policies","Verification at consumption time"]},{"name":"Notary / Notation","foundation":"cncf","url":"https://notaryproject.dev","description":"Standards-based container image signing supporting pluggable trust policies and OCI-native signature storage.","maturity":"incubating","controlsCovered":["Keyless code signing (short-lived certificates)","Verification at consumption time"]},{"name":"Model Signing","foundation":"openssf","url":"https://github.com/sigstore/model-transparency","description":"Applies Sigstore-based signing to ML models — generates signing and provenance for AI/ML model artifacts.","maturity":"experimental","controlsCovered":["Keyless code signing (short-lived certificates)","Provenance attestation (in-toto format)"]},{"name":"DPS (Device Provisioning Service) — OASIS","foundation":"oasis","url":"https://www.oasis-open.org","description":"OASIS standards for secure provisioning and attestation of device firmware/software — relevant for IoT supply chain signing.","maturity":"standard","controlsCovered":["Provenance attestation (in-toto format)"]}],"gaps":[{"title":"Cross-ecosystem signing adoption","severity":"yellow","description":"Sigstore is well-integrated for containers and Go/Python, but npm, Maven Central, Cargo, and RubyGems have varying levels of signing maturity."},{"title":"AI/ML model provenance","severity":"red","description":"Model Signing is experimental. No production-ready standard for verifying ML model provenance, training data integrity, or fine-tuning chain of custody."},{"title":"Consumer-side verification tooling","severity":"red","description":"Most verification requires manual integration. No turnkey solution for organizations to automatically verify all incoming artifact signatures and provenance."}]},{"id":"distribution","number":5,"name":"Package Distribution & Registry","shortName":"Distribution","icon":"🚀","description":"Securely distributing and hosting artifacts through registries, ensuring integrity during transit and storage, and protecting against registry-level attacks.","slsaMapping":"Threats F & G — upload modified package, compromise package registry","s2c2fMapping":"Practice 1 (Ingest It — registry mirror side)","ssdfMapping":"PS.1 — Protect Software / Archive and Protect Each Release","threats":["Registry compromise / account takeover","Package substitution in transit","Registry availability attacks (DoS)","Namespace squatting / hijacking","Stale / abandoned package takeover","Mirror desynchronization / poisoning"],"controls":["Registry MFA / access controls","Package integrity verification (checksums + signatures)","Trusted registry mirrors / air-gapped distribution","Namespace protection policies","End-of-life / deprecation signaling","Content-addressable storage"],"tools":[{"name":"Harbor","foundation":"cncf","url":"https://goharbor.io","description":"Enterprise-grade container registry with vulnerability scanning, content trust (Notary integration), replication, and RBAC.","maturity":"graduated","controlsCovered":["Registry MFA / access controls","Package integrity verification (checksums + signatures)","Trusted registry mirrors / air-gapped distribution"]},{"name":"TUF (for registries)","foundation":"cncf","url":"https://theupdateframework.io","description":"Provides secure update delivery for package registries — protects against replay, mix-and-match, and freeze attacks.","maturity":"graduated","controlsCovered":["Package integrity verification (checksums + signatures)","Content-addressable storage"]},{"name":"Zarf","foundation":"openssf","url":"https://zarf.dev","description":"Declarative air-gap package manager — bundles K8s manifests, container images, and Helm charts for disconnected deployment.","maturity":"sandbox","controlsCovered":["Trusted registry mirrors / air-gapped distribution"]},{"name":"OpenEoX","foundation":"oasis","url":"https://github.com/oasis-tcs/openeox","description":"Open standard for communicating end-of-life and end-of-support information for software products.","maturity":"draft","controlsCovered":["End-of-life / deprecation signaling"]},{"name":"OCI Distribution Spec","foundation":"community","url":"https://github.com/opencontainers/distribution-spec","description":"Open Container Initiative specification for content-addressable artifact distribution — standard API for container registries.","maturity":"standard","controlsCovered":["Content-addressable storage","Package integrity verification (checksums + signatures)"]},{"name":"Dragonfly","foundation":"cncf","url":"https://d7y.io","description":"P2P-based image and file distribution system — accelerates large-scale container image distribution with integrity verification.","maturity":"incubating","controlsCovered":["Trusted registry mirrors / air-gapped distribution"]}],"gaps":[{"title":"Universal registry tamper protection","severity":"yellow","description":"No universal mechanism for tamper-proof registries across npm, PyPI, Maven, RubyGems. Each ecosystem has ad-hoc protections."},{"title":"Namespace squatting prevention","severity":"yellow","description":"No cross-ecosystem standard or tool for preventing namespace/package name squatting and typosquatting at registry level."},{"title":"Non-container artifact registries","severity":"yellow","description":"Harbor, OCI spec, and most tooling targets containers. Registries for other artifact types (npm, PyPI, Maven) have fewer open source security options."}]},{"id":"scanning","number":6,"name":"Vulnerability Scanning & Analysis","shortName":"Scanning","icon":"🔍","description":"Identifying known vulnerabilities, generating advisories, assessing exploitability, and prioritizing remediation through automated scanning and analysis.","slsaMapping":"N/A (post-build consumer concern)","s2c2fMapping":"Practice 2 (Scan It)","ssdfMapping":"RV.1 — Identify and Confirm Vulnerabilities on an Ongoing Basis","threats":["Known vulnerabilities in dependencies","Zero-day vulnerabilities","False negatives in scanners","Alert fatigue from false positives","Delayed vulnerability disclosure","Incomplete vulnerability databases"],"controls":["Continuous vulnerability scanning (SCA)","Vulnerability database aggregation (OSV)","Exploitability / reachability analysis","VEX (Vulnerability Exploitability eXchange)","Coordinated vulnerability disclosure","Fuzzing for unknown vulnerability discovery"],"tools":[{"name":"OSV (Open Source Vulnerabilities) Schema","foundation":"community","url":"https://osv.dev","description":"Distributed vulnerability database and interchange format for open source — aggregates advisories from multiple ecosystems with precise version-range matching.","maturity":"production","controlsCovered":["Vulnerability database aggregation (OSV)","Continuous vulnerability scanning (SCA)"]},{"name":"OSV-Scanner","foundation":"community","url":"https://github.com/google/osv-scanner","description":"Vulnerability scanner using the OSV database — scans lockfiles, SBOMs, and container images with ecosystem-native version semantics.","maturity":"production","controlsCovered":["Continuous vulnerability scanning (SCA)","Vulnerability database aggregation (OSV)"]},{"name":"OpenVEX","foundation":"openssf","url":"https://openvex.dev","description":"Open implementation of the VEX (Vulnerability Exploitability eXchange) specification — enables publishers to communicate vulnerability exploitability status.","maturity":"active","controlsCovered":["VEX (Vulnerability Exploitability eXchange)"]},{"name":"CSAF 2.0 (Common Security Advisory Framework)","foundation":"oasis","url":"https://oasis-open.github.io/csaf-documentation/","description":"OASIS standard for machine-readable security advisories including VEX profiles — successor to CVRF, adopted by CISA.","maturity":"standard","controlsCovered":["Coordinated vulnerability disclosure","VEX (Vulnerability Exploitability eXchange)"]},{"name":"Fuzz Introspector","foundation":"openssf","url":"https://github.com/ossf/fuzz-introspector","description":"Analyzes fuzz testing coverage and code reachability to improve fuzzer effectiveness — surfaces under-tested code paths.","maturity":"active","controlsCovered":["Fuzzing for unknown vulnerability discovery"]},{"name":"OSS-Fuzz","foundation":"community","url":"https://github.com/google/oss-fuzz","description":"Continuous fuzzing service for open source; has found 10,000+ bugs across 1,000+ projects. Free for open source projects.","maturity":"production","controlsCovered":["Fuzzing for unknown vulnerability discovery"]},{"name":"Trivy","foundation":"community","url":"https://trivy.dev","description":"Comprehensive vulnerability scanner for containers, filesystems, Git repos, and Kubernetes — supports OS packages, language libraries, and IaC misconfigs.","maturity":"production","controlsCovered":["Continuous vulnerability scanning (SCA)"]},{"name":"Grype","foundation":"community","url":"https://github.com/anchore/grype","description":"Vulnerability scanner for container images and filesystems — matches packages against multiple vulnerability databases.","maturity":"production","controlsCovered":["Continuous vulnerability scanning (SCA)"]},{"name":"SW360","foundation":"eclipse","url":"https://www.eclipse.org/sw360/","description":"Software component catalogue and license management — tracks components, vulnerabilities, and license obligations across the organization.","maturity":"production","controlsCovered":["Continuous vulnerability scanning (SCA)","Coordinated vulnerability disclosure"]},{"name":"CoSAI (Coalition for Secure AI)","foundation":"oasis","url":"https://www.coalitionforsecureai.org","description":"OASIS collaboration developing frameworks for AI security assessment — includes supply chain security for AI/ML models and training data.","maturity":"forming","controlsCovered":["Exploitability / reachability analysis"]},{"name":"OHDF (OASIS Heimdall Data Format)","foundation":"oasis","url":"https://saf.mitre.org","description":"Standardized format for security assessment results — normalizes output from multiple security tools for unified analysis.","maturity":"active","controlsCovered":["Continuous vulnerability scanning (SCA)"]}],"gaps":[{"title":"Reachability / exploitability analysis","severity":"yellow","description":"Most scanners report all CVEs regardless of whether vulnerable code is actually reachable. Reachability analysis is nascent and per-ecosystem."},{"title":"AI/ML model vulnerability scanning","severity":"red","description":"No open source scanner can assess ML models for adversarial vulnerabilities, poisoned training data, or backdoors. CoSAI is pre-production."},{"title":"VEX adoption and tooling","severity":"yellow","description":"VEX/OpenVEX/CSAF standards exist but producer-side adoption is minimal. Most software vendors don't publish VEX documents."}]},{"id":"sbom","number":7,"name":"SBOM & Inventory Management","shortName":"SBOM","icon":"📋","description":"Generating, distributing, consuming, and managing Software Bills of Materials for software transparency, compliance, and vulnerability management.","slsaMapping":"N/A (complementary to provenance)","s2c2fMapping":"Practice 3 (Inventory It)","ssdfMapping":"PS.3 — Provide a Mechanism for Verifying Software Integrity / SBOM","threats":["Incomplete or inaccurate SBOM","SBOM format fragmentation (SPDX vs CycloneDX)","SBOM not kept in sync with releases","Inability to consume SBOMs at scale","Missing transitive dependency information","SBOM quality — no fitness scoring"],"controls":["Automated SBOM generation in CI/CD","SBOM format standardization","SBOM distribution alongside artifacts","SBOM consumption and querying platform","SBOM quality / completeness scoring","Linking SBOMs to vulnerability data"],"tools":[{"name":"SPDX (ISO/IEC 5962)","foundation":"lf","url":"https://spdx.dev","description":"International standard for software bill of materials — defines format for communicating component information including licensing, security, and provenance.","maturity":"standard","controlsCovered":["SBOM format standardization","Automated SBOM generation in CI/CD"]},{"name":"CycloneDX","foundation":"owasp","url":"https://cyclonedx.org","description":"Lightweight SBOM standard for application security contexts — supports software, hardware, SaaSBOM, ML-BOM, and VEX in a single format.","maturity":"standard","controlsCovered":["SBOM format standardization","Automated SBOM generation in CI/CD","Linking SBOMs to vulnerability data"]},{"name":"bomctl","foundation":"openssf","url":"https://github.com/bomctl/bomctl","description":"Format-agnostic SBOM tooling — merge, diff, filter, and transform SBOMs across SPDX and CycloneDX formats.","maturity":"sandbox","controlsCovered":["SBOM format standardization","SBOM consumption and querying platform"]},{"name":"protobom","foundation":"openssf","url":"https://github.com/protobom/protobom","description":"Protocol buffer-based SBOM interchange library — enables lossless translation between SPDX and CycloneDX formats.","maturity":"sandbox","controlsCovered":["SBOM format standardization"]},{"name":"SBOMit","foundation":"openssf","url":"https://github.com/sbomit","description":"SBOM attestation and integrity framework — links SBOMs to build provenance using in-toto attestations.","maturity":"experimental","controlsCovered":["SBOM distribution alongside artifacts","Linking SBOMs to vulnerability data"]},{"name":"GUAC (Graph for Understanding Artifact Composition)","foundation":"openssf","url":"https://guac.sh","description":"Knowledge graph aggregating SBOMs, SLSA provenance, OpenVEX, Scorecard, and vulnerability data into a queryable supply chain intelligence platform.","maturity":"incubating","controlsCovered":["SBOM consumption and querying platform","Linking SBOMs to vulnerability data"]},{"name":"OWASP Dependency-Track","foundation":"owasp","url":"https://dependencytrack.org","description":"Continuous SBOM analysis platform — ingests SBOMs, tracks components across portfolio, identifies vulnerabilities, and manages policy compliance.","maturity":"flagship","controlsCovered":["SBOM consumption and querying platform","Linking SBOMs to vulnerability data","SBOM quality / completeness scoring"]},{"name":"Syft","foundation":"community","url":"https://github.com/anchore/syft","description":"CLI tool for generating SBOMs from container images and filesystems — supports SPDX and CycloneDX output formats.","maturity":"production","controlsCovered":["Automated SBOM generation in CI/CD"]},{"name":"Tern","foundation":"community","url":"https://github.com/tern-tools/tern","description":"Container image inspector generating SBOMs by analyzing image layers and package managers.","maturity":"active","controlsCovered":["Automated SBOM generation in CI/CD"]},{"name":"OSIM (Open Supplychain Information Modeling)","foundation":"oasis","url":"https://www.oasis-open.org","description":"OASIS initiative for unified supply chain information modeling — harmonizes SBOM, VEX, CSAF, and related standards.","maturity":"forming","controlsCovered":["SBOM format standardization"]},{"name":"VSMI (Vulnerability Severity Metadata Index)","foundation":"oasis","url":"https://www.oasis-open.org","description":"OASIS work on standardizing vulnerability severity communication within SBOM/advisory ecosystems.","maturity":"draft","controlsCovered":["Linking SBOMs to vulnerability data"]}],"gaps":[{"title":"SBOM quality scoring","severity":"yellow","description":"No widely adopted standard for SBOM completeness/quality scoring. Consumers cannot assess whether an SBOM is trustworthy or complete."},{"title":"SPDX vs CycloneDX fragmentation","severity":"yellow","description":"Two competing standards create tooling fragmentation. Translation tools (bomctl, protobom) help but are not yet mature."},{"title":"SBOM consumption at enterprise scale","severity":"yellow","description":"Generating SBOMs is increasingly automated; consuming, storing, querying, and acting on thousands of SBOMs is still challenging."},{"title":"AI/ML BOM maturity","severity":"red","description":"CycloneDX ML-BOM exists in draft but tooling for generating ML-BOMs (model cards, training data, hyperparameters) is virtually non-existent."}]},{"id":"monitoring","number":8,"name":"Monitoring, Update & Incident Response","shortName":"Monitor & Respond","icon":"🛡️","description":"Continuous monitoring of deployed software, automated patching/updates, incident response for supply chain attacks, and upstream fix contribution.","slsaMapping":"Availability threats","s2c2fMapping":"Practice 4 (Update It), Practice 8 (Fix + Upstream)","ssdfMapping":"RV.2/RV.3 — Assess, Prioritize, Remediate Vulnerabilities / Analyze Vulnerabilities","threats":["Delayed patching of known vulnerabilities","Regression from updates","Lack of coordinated incident response","No visibility into deployed component versions","Supply chain attack propagation","Unclear responsibility for OSS fixes"],"controls":["Automated dependency updates","Deployment inventory tracking","Supply chain incident response playbooks","Coordinated disclosure processes","Runtime supply chain monitoring","Upstream fix contribution processes"],"tools":[{"name":"Alpha-Omega","foundation":"openssf","url":"https://openssf.org/community/alpha-omega/","description":"OpenSSF project improving security of critical open source projects — Alpha targets top-critical projects, Omega scales security analysis across ecosystems.","maturity":"active","controlsCovered":["Upstream fix contribution processes"]},{"name":"OpenSSF Guides","foundation":"openssf","url":"https://openssf.org/resources/guides/","description":"Collection of practical guides including coordinated vulnerability disclosure, npm security, evaluating OSS, and incident response.","maturity":"active","controlsCovered":["Coordinated disclosure processes","Supply chain incident response playbooks"]},{"name":"CACAO (Collaborative Automated Course of Action Operations)","foundation":"oasis","url":"https://www.oasis-open.org/committees/cacao/","description":"OASIS standard for security playbook automation — defines machine-readable workflows for incident response, threat mitigation, and remediation.","maturity":"standard","controlsCovered":["Supply chain incident response playbooks"]},{"name":"OpenC2","foundation":"oasis","url":"https://openc2.org","description":"OASIS standard for command-and-control of cyber defense components — enables automated, interoperable response actions across security tools.","maturity":"standard","controlsCovered":["Supply chain incident response playbooks","Runtime supply chain monitoring"]},{"name":"STIX/TAXII","foundation":"oasis","url":"https://oasis-open.github.io/cti-documentation/","description":"Standards for cyber threat intelligence sharing — STIX defines threat information structure, TAXII defines transport protocol.","maturity":"standard","controlsCovered":["Coordinated disclosure processes","Supply chain incident response playbooks"]},{"name":"OCA (Open Cybersecurity Alliance)","foundation":"oasis","url":"https://opencybersecurityalliance.org","description":"OASIS initiative for interoperable security tooling — includes Kestrel threat hunting language and security tool integration standards.","maturity":"active","controlsCovered":["Runtime supply chain monitoring"]},{"name":"SCITT (Supply Chain Integrity, Transparency, and Trust)","foundation":"ietf","url":"https://scitt.io","description":"IETF architecture for transparent, auditable supply chain claims — provides append-only transparency registry for all supply chain metadata.","maturity":"draft","controlsCovered":["Deployment inventory tracking","Runtime supply chain monitoring"]},{"name":"Renovate","foundation":"community","url":"https://github.com/renovatebot/renovate","description":"Automated dependency update tool — creates merge requests for outdated dependencies across 70+ package managers.","maturity":"production","controlsCovered":["Automated dependency updates"]},{"name":"Dependabot","foundation":"community","url":"https://github.com/dependabot","description":"GitHub-native automated dependency update and security alert service — creates PRs for vulnerable and outdated dependencies.","maturity":"production","controlsCovered":["Automated dependency updates"]},{"name":"Falco","foundation":"cncf","url":"https://falco.org","description":"Cloud-native runtime security — detects unexpected behaviors, intrusions, and supply chain attacks at runtime using eBPF/kernel module.","maturity":"graduated","controlsCovered":["Runtime supply chain monitoring"]},{"name":"Kyverno","foundation":"cncf","url":"https://kyverno.io","description":"Kubernetes-native policy engine — enforces image signature verification, SBOM requirements, and supply chain policies at admission time.","maturity":"incubating","controlsCovered":["Runtime supply chain monitoring","Deployment inventory tracking"]}],"gaps":[{"title":"Multi-org coordinated response","severity":"red","description":"No open standard or tool for coordinating supply chain incident response across multiple organizations simultaneously (e.g., log4shell-scale events)."},{"title":"Deployed component inventory","severity":"yellow","description":"Runtime SBOM tracking (what's actually deployed vs. what was built) is largely unsolved. SCITT is promising but still in IETF draft."},{"title":"End-to-end policy enforcement","severity":"yellow","description":"No unified policy-as-code engine spans all 8 phases. Kyverno/OPA cover runtime; Minder covers source; nothing connects them."},{"title":"Small project incident capacity","severity":"red","description":"Most small OSS projects have zero incident response capacity. Alpha-Omega covers top projects but thousands of critical small projects are unprotected."}]}],"crossCuttingGaps":[{"title":"AI/ML Supply Chain Security","severity":"red","phases":["signing","scanning","sbom"],"description":"Almost no production tooling exists for model provenance, training data integrity, model poisoning detection, or ML-BOM generation. CoSAI and Model Signing are early-stage."},{"title":"Consumer-Side Verification at Scale","severity":"red","phases":["signing","distribution","sbom"],"description":"Most tools focus on producers (sign, generate SBOM, create provenance). Consumer-side automated verification of all incoming artifacts at enterprise scale is underdeveloped."},{"title":"Small Project Adoption","severity":"yellow","phases":["source","build","signing","monitoring"],"description":"Most tools assume CI/CD sophistication, GitHub ecosystem, and dedicated security resources. Thousands of critical small projects cannot adopt these tools."},{"title":"Cross-Ecosystem Consistency","severity":"yellow","phases":["dependencies","signing","distribution"],"description":"Each package ecosystem (npm, PyPI, Maven, Go, Cargo, RubyGems) has different security capabilities. No unified standard spans all ecosystems."},{"title":"End-to-End Policy Engine","severity":"yellow","phases":["source","build","signing","distribution","scanning","sbom","monitoring"],"description":"No single policy-as-code system covers the entire supply chain. Tools cover individual phases but nothing connects them into a unified enforcement pipeline."},{"title":"Standard Interoperability","severity":"yellow","phases":["scanning","sbom"],"description":"SPDX vs CycloneDX fragmentation, CSAF vs OSV for advisories, and multiple VEX formats create integration overhead. Translation tools exist but are immature."}],"frameworks":[{"name":"SLSA (Supply-chain Levels for Software Artifacts)","foundation":"openssf","url":"https://slsa.dev","description":"Graduated framework with Build L1-L3 levels providing increasing assurances about build integrity and provenance.","phases":["source","build","signing"]},{"name":"S2C2F (Secure Supply Chain Consumption Framework)","foundation":"openssf","url":"https://github.com/ossf/s2c2f","description":"8-practice framework for securely consuming open source: Ingest, Scan, Inventory, Update, Audit, Enforce, Rebuild, Fix+Upstream.","phases":["dependencies","scanning","sbom","monitoring","build"]},{"name":"SSDF (Secure Software Development Framework, NIST SP 800-218)","foundation":"community","url":"https://csrc.nist.gov/Projects/ssdf","description":"NIST framework defining secure software development practices aligned to US executive order requirements.","phases":["source","build","signing","distribution","scanning","sbom","monitoring"]},{"name":"CNCF Software Supply Chain Best Practices","foundation":"cncf","url":"https://github.com/cncf/tag-security/blob/main/supply-chain-security/supply-chain-security-paper/CNCF_SSCP_v1.pdf","description":"White paper defining supply chain security best practices for cloud-native ecosystems.","phases":["source","dependencies","build","signing","distribution","scanning","sbom","monitoring"]},{"name":"OWASP SCVS (Software Component Verification Standard)","foundation":"owasp","url":"https://scvs.owasp.org","description":"Framework for verifying the integrity and security of software components across the supply chain.","phases":["dependencies","scanning","sbom"]}]};
+
+// ==================== THEME TOGGLE ====================
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const icon = document.getElementById('toggle-icon');
+  const label = document.getElementById('toggle-label');
+  if (icon && label) {
+    icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+    label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('ssc-theme', next); } catch(e) {}
+}
+
+// Apply saved theme on load (before data loads to prevent flash)
+(function() {
+  let saved = 'dark';
+  try { saved = localStorage.getItem('ssc-theme') || 'dark'; } catch(e) {}
+  applyTheme(saved);
+})();
+
+// ==================== BOOT ====================
+loadData();
+</script>
+</body>
+</html>
