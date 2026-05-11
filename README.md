@@ -4,6 +4,11 @@
 
 > **🤖 NEW**: [AI / ML Supply Chain Security Landscape](#ai--ml-supply-chain-security-landscape) — A dedicated 8-phase model covering the full AI lifecycle from training data to production monitoring.
 
+## Interactive Landscapes
+
+- [Supply Chain Security Landscape](./supply-chain-security.html)
+- [AI / ML Supply Chain Security Landscape](./ai-supply-chain-security.html)
+
 ## Table of Contents
 
 - [Unified Supply Chain Model](#unified-supply-chain-model)
